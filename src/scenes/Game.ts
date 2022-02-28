@@ -1,16 +1,34 @@
-import { roomNekos, enemies } from './../services/mockdata';
 import Phaser from "phaser";
 import Server from "../services/Server";
-import IBattleState, { Neko, Skill } from "../../../types/IBattleState";
+import { enemies, roomNekos, map } from "../services/mockdata";
+import { EEntityTypePvERoom } from "../services/types";
 
 export default class Game extends Phaser.Scene {
     private server?: Server;
-    // private cells: { display: Phaser.GameObjects.Rectangle, value: Cell}[] = [];
-    private nekoes: Neko[] = [];
-    private skillInformation: { [key: string]: Skill} = {};
+    private skillInformation: { [key: string]: any} = {};
+    private aliveEnemies: Map<string, any> = new Map();
+    private aliveNekos: Map<string, any> = new Map();
 
     constructor(){
         super('game');
+        enemies.forEach(e => {
+            this.aliveEnemies.set(e.id, {
+                id: e.id,
+                name: e.name,
+                health: e.metadata["health"],
+                atk: e.metadata["atk"],
+                def: e.metadata["def"]
+            })
+        })
+        roomNekos.forEach(n => {
+            this.aliveNekos.set(n.id, {
+                id: n.id,
+                name: n.name,
+                health: n.metadata["health"],
+                atk: n.metadata["atk"],
+                def: n.metadata["def"]
+            })
+        })
     }
 
     async create(data: {server: Server}){
@@ -21,7 +39,7 @@ export default class Game extends Phaser.Scene {
         this.server.initRoom(this.createMap, this);
     }
 
-    private createMap(map: number[], roomNekos: any, enemies: any){
+    private createMap(){
         const { width, height } = this.scale;
         const size = 196;
 
@@ -41,7 +59,7 @@ export default class Game extends Phaser.Scene {
             }
             if(idx === 4){
                 this.add.star(x, y, 10, 10, 80, 0xff0000).setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
-                    this.server?.sendSkillInformation(this.skillInformation);
+                    // this.server?.sendSkillInformation(this.skillInformation);
                 });
             }
             if(idx === 6 || idx === 7 || idx === 8){
@@ -55,10 +73,10 @@ export default class Game extends Phaser.Scene {
         })
         // this.server?.onBoardChanged(this.handleBoardChanged, this);
         this.server?.onQueueChanged(this.addQueue, this);
-        this.server?.onBloodChanged(this.updateBlood, this);
+        // this.server?.onBloodChanged(this.updateBlood, this);
     }
 
-    private addSkills(x: number, y: number, neko: Neko){
+    private addSkills(x: number, y: number, neko: any){
         neko.skills.forEach((value, idx) => {
             this.add.rectangle(x - 60, y + 85*(idx+1) + 55, 80, 80, 0x00ff00).setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
                 this.pickSkills(neko, value);
@@ -68,17 +86,17 @@ export default class Game extends Phaser.Scene {
         })
     }
 
-    private addItems(x: number, y: number, neko: Neko){
+    private addItems(x: number, y: number, neko: any){
         neko.skills.forEach((value, idx) => {
             this.add.rectangle(x + 60, y + 85*(idx+1) + 55, 80, 80, 0xa020f0).setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
                 this.pickSkills(neko, value);
                 this.add.star(x + 60, y + 85*(idx+1) + 55, 4, 4, 30, 0xff0000);
             });
-            this.add.text(x + 30, y + 85*(idx+1) + 55, `xxx`);
+            this.add.text(x + 30, y + 85*(idx+1) + 55, `${value.name}`);
         })
     }
 
-    private pickSkills(neko: Neko, skill: Skill){
+    private pickSkills(neko: any, skill: any){
         this.skillInformation[neko.name] = skill;
     }
 
@@ -87,14 +105,15 @@ export default class Game extends Phaser.Scene {
         let y = 100;
         queue.forEach((action, idx) => {
             this.add.rectangle(x, y + idx * 100, 80, 80, 0x00ff00);
-            this.add.text(x-35, y + idx * 100, `${action.character_name}`);
+            const name = action.type === EEntityTypePvERoom.NEKO ? `${this.aliveNekos.get(action.id).name}` : `${this.aliveEnemies.get(action.id).name}`;
+            this.add.text(x-35, y + idx * 100, name);
         })
     }
 
-    private updateBlood(state: IBattleState, sessionId: string){
-        console.log("boss", state.bosses[0].blood);
-        console.log("neko 1", state.players[sessionId].nekoes[0].blood);
-        console.log("neko 2", state.players[sessionId].nekoes[1].blood);
-        console.log("neko 3", state.players[sessionId].nekoes[2].blood);
-    }
+    // private updateBlood(state: IBattleState, sessionId: string){
+    //     console.log("boss", state.bosses[0].blood);
+    //     console.log("neko 1", state.players[sessionId].nekoes[0].blood);
+    //     console.log("neko 2", state.players[sessionId].nekoes[1].blood);
+    //     console.log("neko 3", state.players[sessionId].nekoes[2].blood);
+    // }
 }

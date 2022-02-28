@@ -33,8 +33,15 @@ export type TResponseQueue = {
 export type TPlanningInfoPVERoom = {
     nekoId: string,
     actionType: EActionEntityTypePvERoom
-    targets?: [{
+    targets?: {
         id: string, type: EEntityTypePvERoom
-    }],
+    }[],
     actionId?: string;
 }
+
+export type TEntityEffect = {
+    id: string;
+    health?: number;
+    atk?: number;
+    def?: number;
+};
