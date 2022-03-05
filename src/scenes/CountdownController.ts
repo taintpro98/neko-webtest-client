@@ -26,7 +26,7 @@ export default class CountdownController {
         });
     }
 
-    private stop() {
+    public stop() {
         if (this.timerEvent) {
             this.timerEvent.destroy();
             this.timerEvent = undefined;

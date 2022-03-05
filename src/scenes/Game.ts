@@ -27,7 +27,7 @@ export default class Game extends Phaser.Scene {
         this.server = server;
         if (!this.server) throw new Error('Server instance missing');
         await this.server.join();
-        const timerLabel = this.add.text(750, 60, '15', { fontSize: '100' }).setOrigin(1);
+        const timerLabel = this.add.text(750, 60, 'Planning Phase Clock').setOrigin(1);
 
         this.actionClock = new CountdownController(this, timerLabel);
         this.server.initRoom(this.createMap, this);
@@ -95,7 +95,7 @@ export default class Game extends Phaser.Scene {
                         sk.disableInteractive();
                     });
                     this.server?.sendSkillInformation(this.skillInfo);
-                    this.notification?.setText("SENT YOUR ACTION")
+                    this.notification?.setText("SENT YOUR ACTION");
                 });;
                 ee.object = this.add.star(x, y, 4, 8, 60, 0xff0000);
                 ee.object.setVisible(false);
@@ -103,8 +103,8 @@ export default class Game extends Phaser.Scene {
                 this.add.text(x - 80, y, `Boss ${enemies[idx].name}`);
                 ee.text = this.add.text(x - 80, y + 20, `Health: ${enemies[idx].metadata["health"]}`);
             }
-            if (idx === 4) {
-                this.notification = this.add.text(755, 405, '', { color: 'red' }).setOrigin(1);
+            if (idx === 5) {
+                this.notification = this.add.text(480, 350, '', { color: 'red' });
             }
             if (idx === 6 || idx === 7 || idx === 8) {
                 const ne = this.aliveNekos.get(roomNekos[idx - 6].id);
@@ -185,7 +185,7 @@ export default class Game extends Phaser.Scene {
                 if (idx === currIdx) {
                     this.actionClock?.start(this.handleCountdownFinished.bind(this), 15000);
                     // this.actionButton?.setInteractive();
-
+                    this.notification?.setText("CHOOSE A PLAN FOR YOUR NEKO AND PICK ONLY ONE ENEMY AS YOUR TARGET");
                     this.skillInfo.nekoId = action.id;
                     chosenOne.skills.forEach(sk => {
                         sk.setInteractive();
@@ -237,6 +237,6 @@ export default class Game extends Phaser.Scene {
             }
         })
         this.notification?.setText('Making Animation');
-        setTimeout(() => this.server?.sendDoneAnimation(), 2000);
+        setTimeout(() => this.server?.sendDoneAnimation(), 3000);
     }
 }
