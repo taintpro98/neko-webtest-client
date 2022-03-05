@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import Server from "../services/Server";
-import { enemies, roomNekos, map } from "../services/mockdata";
+import { map } from "../services/mockdata";
 import { EEntityTypePvERoom, TPlanningInfoPVERoom, TEntityEffect, EActionEntityTypePvERoom } from "../services/types";
 import CountdownController from "./CountdownController";
 
@@ -16,14 +16,33 @@ export default class Game extends Phaser.Scene {
     private aliveNekos: Map<string, any> = new Map();
     private actionClock?: CountdownController;
     private actionButton?: Phaser.GameObjects.Rectangle;
-    // private targetCharacters?: {
-    //     id: string,
-    //     type: EEntityTypePvERoom
-    // }[] = [];
     private notification?: Phaser.GameObjects.Text;
 
     constructor() {
         super('game');
+    }
+
+    async create(data: { server: Server }) {
+        const { server } = data;
+        this.server = server;
+        if (!this.server) throw new Error('Server instance missing');
+        await this.server.join();
+        const timerLabel = this.add.text(750, 60, '15', { fontSize: '100' }).setOrigin(1);
+
+        this.actionClock = new CountdownController(this, timerLabel);
+        this.server.initRoom(this.createMap, this);
+    }
+
+    update(time: number, delta: number): void {
+        this.actionClock?.update();
+    }
+
+    private handleCountdownFinished() {
+        this.server?.sendSkillInformation(this.skillInfo);
+        this.notification?.setText("YOU DID NOT PLAN ANYTHING ! SO YOUR NEKO AUTOMATICALLY FIGHT");
+    }
+
+    private createMap(roomNekos: any[], enemies: any[]) {
         enemies.forEach(e => {
             this.aliveEnemies.set(e.id, {
                 id: e.id,
@@ -48,29 +67,7 @@ export default class Game extends Phaser.Scene {
                 items: []
             })
         })
-    }
 
-    async create(data: { server: Server }) {
-        const { server } = data;
-        this.server = server;
-        if (!this.server) throw new Error('Server instance missing');
-        await this.server.join();
-        const timerLabel = this.add.text(750, 60, '15', { fontSize: '100' }).setOrigin(1);
-
-        this.actionClock = new CountdownController(this, timerLabel);
-        this.server.initRoom(this.createMap, this);
-    }
-
-    update(time: number, delta: number): void {
-        this.actionClock?.update();
-    }
-
-    private handleCountdownFinished() {
-        this.add.text(750, 60, 'Default action');
-        this.server?.sendSkillInformation(this.skillInfo);
-    }
-
-    private createMap() {
         const { width, height } = this.scale;
         const size = 196;
 
@@ -92,6 +89,13 @@ export default class Game extends Phaser.Scene {
                         id: ee.id,
                         type: EEntityTypePvERoom.ENEMY
                     });
+                    const ne = this.aliveNekos.get(this.skillInfo.nekoId);
+                    ne.skills.forEach(sk => {
+                        sk.setAngle(90);
+                        sk.disableInteractive();
+                    });
+                    this.server?.sendSkillInformation(this.skillInfo);
+                    this.notification?.setText("SENT YOUR ACTION")
                 });;
                 ee.object = this.add.star(x, y, 4, 8, 60, 0xff0000);
                 ee.object.setVisible(false);
@@ -125,16 +129,17 @@ export default class Game extends Phaser.Scene {
         //     this.server?.startTurn();
         // });
         // this.add.text(1250, 150, 'Start Turn');
-        this.actionButton = this.add.rectangle(1300, 650, 100, 100, 0x7b7aa6).setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
-            this.actionButton?.disableInteractive();
-            const ne = this.aliveNekos.get(this.skillInfo.nekoId);
-            ne.skills.forEach(sk => {
-                sk.setAngle(90);
-                sk.disableInteractive();
-            });
-            this.server?.sendSkillInformation(this.skillInfo);
-        });
-        this.add.text(1260, 650, 'Action');
+
+        // this.actionButton = this.add.rectangle(1300, 650, 100, 100, 0x7b7aa6).setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
+        //     this.actionButton?.disableInteractive();
+        //     const ne = this.aliveNekos.get(this.skillInfo.nekoId);
+        //     ne.skills.forEach(sk => {
+        //         sk.setAngle(90);
+        //         sk.disableInteractive();
+        //     });
+        //     this.server?.sendSkillInformation(this.skillInfo);
+        // });
+        // this.add.text(1260, 650, 'Action');
 
         this.server?.onQueueChanged(this.addQueue, this);
         this.server?.updateResults(this.updateResults, this);
@@ -148,11 +153,12 @@ export default class Game extends Phaser.Scene {
     private addSkillsnItems(x: number, y: number, neko: any) {
         const ne = this.aliveNekos.get(neko.id);
         neko.skills.forEach((value, idx) => {
-            let tmp = this.add.rectangle(x - 60, y + 85 * (idx + 1) + 55, 80, 80, 0x00ff00).setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
+            let tmp = this.add.rectangle(x - 60, y + 85 * (idx + 1) + 55, 80, 80, 0x9d8e00).setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
                 tmp.setAngle(45);
                 this.skillInfo.actionType = EActionEntityTypePvERoom.SKILL;
                 this.skillInfo.actionId = value.id;
             })
+            tmp.setVisible(false);
             tmp.disableInteractive();
             ne.skills.push(tmp);
             this.add.text(x - 90, y + 85 * (idx + 1) + 55, `${value.name}`);
@@ -170,7 +176,7 @@ export default class Game extends Phaser.Scene {
         let y = 100;
 
         queue.forEach((action, idx) => {
-            this.add.rectangle(x, y + idx * 100, 80, 80, idx === currIdx ? 0xc97aa6 : 0x00ff00);
+            this.add.rectangle(x, y + idx * 100, 80, 80, idx === currIdx ? 0xc97aa6 : 0x49643d);
             const name = action.type === EEntityTypePvERoom.NEKO ? `${this.aliveNekos.get(action.id)?.name || "Dead"}` : `${this.aliveEnemies.get(action.id)?.name || "Dead"}`;
             this.add.text(x - 35, y + idx * 100, name);
 
@@ -178,16 +184,18 @@ export default class Game extends Phaser.Scene {
                 let chosenOne = this.aliveNekos.get(action.id);
                 if (idx === currIdx) {
                     this.actionClock?.start(this.handleCountdownFinished.bind(this), 15000);
-                    this.actionButton?.setInteractive();
+                    // this.actionButton?.setInteractive();
 
                     this.skillInfo.nekoId = action.id;
                     chosenOne.skills.forEach(sk => {
                         sk.setInteractive();
+                        sk.setVisible(true);
                         sk.setAngle(90);
                     });
                 } else {
                     chosenOne.skills.forEach(sk => {
                         sk.disableInteractive();
+                        sk.setVisible(false);
                         sk.setAngle(90);
                     });
                 }
@@ -230,6 +238,5 @@ export default class Game extends Phaser.Scene {
         })
         this.notification?.setText('Making Animation');
         setTimeout(() => this.server?.sendDoneAnimation(), 2000);
-        // this.server?.sendDoneAnimation();
     }
 }

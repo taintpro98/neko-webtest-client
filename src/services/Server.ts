@@ -1,3 +1,4 @@
+import { roomNekos, enemies } from './mockdata';
 import { Client, Room } from 'colyseus.js';
 import { Schema } from '@colyseus/schema';
 import Phaser from 'phaser';
@@ -9,6 +10,8 @@ export default class Server {
     private events: Phaser.Events.EventEmitter;
     private queue: any[] = [];
     private currIdx: number = 0;
+    private roomNekos: any[] = [];
+    private enemies: any[] = [];
 
     constructor() {
         this.client = new Client('ws://localhost:4000');
@@ -16,16 +19,71 @@ export default class Server {
     }
 
     async join() {
-        this.room = await this.client.joinOrCreate('pve_room', {
-            playerId: 1
-        });
+        this.room = await this.client.joinOrCreate('pve_room', {});
+
+        // update enemy, neko and consumption_items follow server
+        this.room.state.nekos.onAdd = (neko, key) => {
+            let skills: any[] = [];
+            neko.skills.forEach((value, key) => {
+                skills.push({
+                    id: value.id,
+                    name: value.name,
+                    metadata: {
+                        function: value.metadata.function,
+                        atk: value.metadata.atk,
+                        speed: value.metadata.speed,
+                        def: value.metadata.def,
+                    },
+                });
+            });
+            this.roomNekos.push({
+                id: neko.id,
+                name: neko.name,
+                skills: skills,
+                metadata: {
+                    atk: neko.metadata.atk,
+                    def: neko.metadata.def,
+                    health: neko.metadata.health,
+                    speed: neko.metadata.speed,
+                },
+            });
+        };
+
+        this.room.state.enemies.onAdd = (enemy, key) => {
+            let skills: any[] = [];
+            enemy.skills.forEach((value, key) => {
+                skills.push({
+                    id: value.id,
+                    name: value.name,
+                    metadata: {
+                        function: value.metadata.function,
+                        atk: value.metadata.atk,
+                        speed: value.metadata.speed,
+                        def: value.metadata.def,
+                    },
+                });
+            });
+
+            this.enemies.push({
+                id: enemy.id,
+                name: enemy.name,
+                skills: skills,
+                strategy: enemy.strategy,
+                metadata: {
+                    atk: enemy.metadata.atk,
+                    def: enemy.metadata.def,
+                    speed: enemy.metadata.speed,
+                    health: enemy.metadata.health,
+                },
+            });
+        };
 
         this.room.onMessage("*", (type, message) => {
             switch (type) {
                 case EMessagePVERoom.Ready:
                     console.log("READY");
                     this.events.emit('notification', 'READY');
-                    this.events.emit('init-room');
+                    this.events.emit('init-room', this.roomNekos, this.enemies);
                     break;
                 case EMessagePVERoom.StartRound:
                     console.log("START ROUND");
@@ -34,23 +92,9 @@ export default class Server {
                 case EMessagePVERoom.CalculateQueue:
                     console.log("GET A QUEUE");
                     this.events.emit('notification', 'GET A QUEUE');
-                    this.queue = [...message.params.turns];
-                    this.currIdx = message.params.index;
-                    this.events.emit('queue-changed', this.queue, message.params.index);
-
-                    // let character = this.queue[this.currIdx];
-
-                    // if (character.type === EEntityTypePvERoom.NEKO) {
-                    //     const neko = roomNekos.filter(n => n.id === character.id)[0];
-                    //     const targets = getTargetEnemies(aliveEnemies);
-                    //     const skillInfo: TPlanningInfoPVERoom = {
-                    //         nekoId: character.id,
-                    //         actionType: 0,
-                    //         targets: targets,
-                    //         actionId: neko.skills[0].id
-                    //     };
-                    //     this.send(EMessagePVERoom.Action, skillInfo);
-                    // }
+                    this.queue = [...message.params.turns].reverse();
+                    this.currIdx = 5 - message.params.index;
+                    this.events.emit('queue-changed', this.queue, this.currIdx);
                     break;
                 case EMessagePVERoom.Result:
                     console.log("RESULTS");
@@ -75,14 +119,16 @@ export default class Server {
         });
 
         // this.room.state.onChange = (changes) => {
-        //     console.log("xxxxxxxxxx", changes);
         //     changes.forEach(change => {
         //         const { field, value } = change;
         //         switch(field){
-        //             case 'queue':
-        //                 this.events.emit('queue-changed', value);
+        //             case 'nekos':
+        //                 console.log("value", [...value.values()]);
+        //                 this.roomNekos = [...value.values()]
         //                 break;
-        //             case 'bosses':
+        //             case 'enemies':
+        //                 console.log("enemies");
+        //                 this.enemies = [...value.values()];
         //                 break;
         //         }
         //     })
@@ -94,7 +140,7 @@ export default class Server {
         // });
     }
 
-    initRoom(cb: () => void, context?: any) {
+    initRoom(cb: (roomNekos: any[], enemies: any[]) => void, context?: any) {
         this.events.once('init-room', cb, context);
     }
 
