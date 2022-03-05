@@ -15,7 +15,7 @@ export default class Game extends Phaser.Scene {
     private aliveEnemies: Map<string, any> = new Map();
     private aliveNekos: Map<string, any> = new Map();
     private actionClock?: CountdownController;
-    private actionButton?: Phaser.GameObjects.Rectangle;
+    // private actionButton?: Phaser.GameObjects.Rectangle;
     private notification?: Phaser.GameObjects.Text;
 
     constructor() {
@@ -95,7 +95,7 @@ export default class Game extends Phaser.Scene {
                         sk.disableInteractive();
                     });
                     this.server?.sendSkillInformation(this.skillInfo);
-                    this.notification?.setText("SENT YOUR ACTION");
+                    this.notification?.setText("SENDING YOUR ACTION...");
                 });;
                 ee.object = this.add.star(x, y, 4, 8, 60, 0xff0000);
                 ee.object.setVisible(false);
@@ -107,16 +107,17 @@ export default class Game extends Phaser.Scene {
                 this.notification = this.add.text(480, 350, '', { color: 'red' });
             }
             if (idx === 6 || idx === 7 || idx === 8) {
-                const ne = this.aliveNekos.get(roomNekos[idx - 6].id);
-                this.add.circle(x, y, 85, 0xFFC0CB).setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
-                    ne.object.setVisible(true);
-                    this.skillInfo.targets?.push({
-                        id: ne.id,
-                        type: EEntityTypePvERoom.NEKO
-                    });
-                });
-                ne.object = this.add.star(x, y, 4, 8, 60, 0xff0000);
-                ne.object.setVisible(false);
+                // const ne = this.aliveNekos.get(roomNekos[idx - 6].id);
+                this.add.circle(x, y, 85, 0xFFC0CB)
+                // .setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
+                //     ne.object.setVisible(true);
+                //     this.skillInfo.targets?.push({
+                //         id: ne.id,
+                //         type: EEntityTypePvERoom.NEKO
+                //     });
+                // });
+                // ne.object = this.add.star(x, y, 4, 8, 60, 0xff0000);
+                // ne.object.setVisible(false);
 
                 this.add.text(x - 80, y, `Neko ${roomNekos[idx - 6].name}`);
                 this.aliveNekos.get(roomNekos[idx - 6].id).text = this.add.text(x - 80, y + 20, `Health: ${roomNekos[idx - 6].metadata["health"]}`)
@@ -155,6 +156,7 @@ export default class Game extends Phaser.Scene {
         neko.skills.forEach((value, idx) => {
             let tmp = this.add.rectangle(x - 60, y + 85 * (idx + 1) + 55, 80, 80, 0x9d8e00).setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
                 tmp.setAngle(45);
+                this.notification?.setText("NOW PICK ONLY ONE ENEMY");
                 this.skillInfo.actionType = EActionEntityTypePvERoom.SKILL;
                 this.skillInfo.actionId = value.id;
             })
@@ -177,7 +179,7 @@ export default class Game extends Phaser.Scene {
 
         queue.forEach((action, idx) => {
             this.add.rectangle(x, y + idx * 100, 80, 80, idx === currIdx ? 0xc97aa6 : 0x49643d);
-            const name = action.type === EEntityTypePvERoom.NEKO ? `${this.aliveNekos.get(action.id)?.name || "Dead"}` : `${this.aliveEnemies.get(action.id)?.name || "Dead"}`;
+            const name = action.type === EEntityTypePvERoom.NEKO ? `${this.aliveNekos.get(action.id)?.name || "DEAD"}` : `${this.aliveEnemies.get(action.id)?.name || "DEAD"}`;
             this.add.text(x - 35, y + idx * 100, name);
 
             if (action.type === EEntityTypePvERoom.NEKO) {
@@ -185,7 +187,7 @@ export default class Game extends Phaser.Scene {
                 if (idx === currIdx) {
                     this.actionClock?.start(this.handleCountdownFinished.bind(this), 15000);
                     // this.actionButton?.setInteractive();
-                    this.notification?.setText("CHOOSE A PLAN FOR YOUR NEKO AND PICK ONLY ONE ENEMY AS YOUR TARGET");
+                    this.notification?.setText("CHOOSE A SKILL OR A ITEM FOR NEKO");
                     this.skillInfo.nekoId = action.id;
                     chosenOne.skills.forEach(sk => {
                         sk.setInteractive();
@@ -205,9 +207,9 @@ export default class Game extends Phaser.Scene {
         this.aliveEnemies.forEach((ee, key) => {
             ee.object.setVisible(false);
         })
-        this.aliveNekos.forEach((ne, key) => {
-            ne.object.setVisible(false);
-        })
+        // this.aliveNekos.forEach((ne, key) => {
+        //     ne.object.setVisible(false);
+        // })
         this.skillInfo.targets = [];
     }
 
@@ -220,7 +222,7 @@ export default class Game extends Phaser.Scene {
             effectNeko.text.setText(`Health: ${effectNeko.health}`);
             if (effectNeko.health <= 0) {
                 effectNeko.object.setVisible(true);
-                effectNeko.text.setText('This Neko was dead');
+                effectNeko.text.setText('DEAD');
                 this.aliveNekos.delete(ne.id);
             }
         })
@@ -232,11 +234,11 @@ export default class Game extends Phaser.Scene {
             effectEnemy.text.setText(`Health: ${effectEnemy.health}`);
             if (effectEnemy.health <= 0) {
                 effectEnemy.object.setVisible(true);
-                effectEnemy.text.setText('This Enemy was dead');
+                effectEnemy.text.setText('DEAD');
                 this.aliveEnemies.delete(ee.id);
             }
         })
-        this.notification?.setText('Making Animation');
+        this.notification?.setText('MAKING ANIMATION...');
         setTimeout(() => this.server?.sendDoneAnimation(), 3000);
     }
 }
