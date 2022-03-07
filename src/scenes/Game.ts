@@ -226,13 +226,11 @@ export default class Game extends Phaser.Scene {
         //     ne.object.setVisible(false);
         // })
         this.skillInfo.targets = [];
+        this.skillInfo.actionType = EActionEntityTypePvERoom.NONE;
     }
 
     private async updateResults(effect: any) {
-        console.log("updateResults")
-        console.log(effect)
         await effect.nekos.forEach((ne: TEntityEffect) => {
-            console.log("mana", ne.mana);
             const effectNeko = this.aliveNekos.get(ne.id);
             effectNeko.health += ne.health;
             effectNeko.def += ne.def;

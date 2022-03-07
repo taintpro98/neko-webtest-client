@@ -93,10 +93,13 @@ export default class Server {
                     break;
                 case EMessagePVERoom.CalculateQueue:
                     console.log("GET A QUEUE");
-                    this.events.emit('notification', 'GET A QUEUE, YOUR ENEMIES ARE HITTING YOU');
+                    this.events.emit('notification', 'GET A QUEUE');
                     this.queue = [...message.params.turns].reverse();
                     this.currIdx = 5 - message.params.index;
-                    this.events.emit('queue-changed', this.queue, this.currIdx);
+                    setTimeout(() => {
+                        this.startTurn();
+                        this.events.emit('queue-changed', this.queue, this.currIdx);
+                    }, 2000);
                     break;
                 case EMessagePVERoom.Result:
                     console.log("RESULTS");
@@ -151,6 +154,8 @@ export default class Server {
     }
 
     startTurn() {
+        console.log("START TURN");
+        this.events.emit("notification", "START TURN");
         if (!this.room) return;
         this.room.send(EMessagePVERoom.StartTurn, this.currIdx);
     }
