@@ -36,7 +36,7 @@ export type TPlanningInfoPVERoom = {
     targets?: {
         id: string, type: EEntityTypePvERoom
     }[],
-    actionId?: string;
+    actionId?: string
 }
 
 export type TEntityEffect = {
@@ -44,4 +44,5 @@ export type TEntityEffect = {
     health?: number;
     atk?: number;
     def?: number;
+    mana?: number
 };

@@ -33,6 +33,7 @@ export default class Server {
                         atk: value.metadata.atk,
                         speed: value.metadata.speed,
                         def: value.metadata.def,
+                        mana: value.metadata.mana
                     },
                 });
             });
@@ -45,6 +46,7 @@ export default class Server {
                     def: neko.metadata.def,
                     health: neko.metadata.health,
                     speed: neko.metadata.speed,
+                    mana: neko.metadata.mana
                 },
             });
         };
