@@ -2,7 +2,7 @@ import { roomNekos, enemies } from './mockdata';
 import { Client, Room } from 'colyseus.js';
 import { Schema } from '@colyseus/schema';
 import Phaser from 'phaser';
-import { EMessagePVERoom, EEntityTypePvERoom, TPlanningInfoPVERoom, TEntityEffect } from './types';
+import { EMessagePVERoom, TPlanningInfoPVERoom, TEntityEffect } from './types';
 
 export default class Server {
     private client: Client;

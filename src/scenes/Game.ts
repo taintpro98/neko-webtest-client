@@ -39,7 +39,6 @@ export default class Game extends Phaser.Scene {
     }
 
     private handleCountdownFinished() {
-        // this.server?.sendSkillInformation(this.skillInfo);
         this.notification?.setText("YOU DIDN'T PLAN ANYTHING ! SO YOUR NEKO AUTOMATICALLY FIGHT");
     }
 
@@ -54,7 +53,8 @@ export default class Game extends Phaser.Scene {
                 mana: e.metadata["mana"],
                 health_text: null,
                 mana_text: null,
-                object: null
+                star_object: null,
+                circle_object: null
             })
         })
         roomNekos.forEach(n => {
@@ -67,7 +67,8 @@ export default class Game extends Phaser.Scene {
                 mana: n.metadata["mana"],
                 health_text: null,
                 mana_text: null,
-                object: null,
+                star_object: null,
+                circle_object: null,
                 skills: [],
                 items: []
             })
@@ -87,8 +88,8 @@ export default class Game extends Phaser.Scene {
             this.add.rectangle(x, y, size, size, 0xffffff);
             if (idx === 0 || idx === 1 || idx === 2) {
                 const ee = this.aliveEnemies.get(enemies[idx].id);
-                this.add.circle(x, y, 85, 0x0000ff).setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
-                    ee.object.setVisible(true);
+                ee.circle_object = this.add.circle(x, y, 85, 0x0000ff).setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
+                    ee.star_object.setVisible(true);
                     this.skillInfo.targets?.push({
                         id: ee.id,
                         type: EEntityTypePvERoom.ENEMY
@@ -106,8 +107,9 @@ export default class Game extends Phaser.Scene {
                     this.notification?.setText("SENDING YOUR ACTION...");
                     this.actionClock?.stop();
                 });;
-                ee.object = this.add.star(x, y, 4, 8, 60, 0xff0000);
-                ee.object.setVisible(false);
+                ee.star_object = this.add.star(x, y, 4, 8, 60, 0xff0000);
+                ee.star_object.setVisible(false);
+                // ee.circle_object.setDepth(0.5)
 
                 this.add.text(x - 80, y, `Boss ${enemies[idx].name}`);
                 ee.health_text = this.add.text(x - 80, y + 20, `Health: ${enemies[idx].metadata["health"]}`);
@@ -117,7 +119,7 @@ export default class Game extends Phaser.Scene {
             }
             if (idx === 6 || idx === 7 || idx === 8) {
                 const ne = this.aliveNekos.get(roomNekos[idx - 6].id);
-                this.add.circle(x, y, 85, 0xFFC0CB)
+                ne.circle_object = this.add.circle(x, y, 85, 0xFFC0CB)
                 // .setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
                 //     ne.object.setVisible(true);
                 //     this.skillInfo.targets?.push({
@@ -125,8 +127,8 @@ export default class Game extends Phaser.Scene {
                 //         type: EEntityTypePvERoom.NEKO
                 //     });
                 // });
-                ne.object = this.add.star(x, y, 4, 8, 60, 0xff0000);
-                ne.object.setVisible(false);
+                ne.star_object = this.add.star(x, y, 4, 8, 60, 0xff0000);
+                ne.star_object.setVisible(false);
                 this.add.text(x - 80, y, `Neko ${roomNekos[idx - 6].name}`);
                 this.aliveNekos.get(roomNekos[idx - 6].id).health_text = this.add.text(x - 80, y + 20, `Health: ${roomNekos[idx - 6].metadata["health"]}`);
                 this.aliveNekos.get(roomNekos[idx - 6].id).mana_text = this.add.text(x - 70, y + 40, `Mana: ${roomNekos[idx - 6].metadata["mana"]}`);
@@ -163,12 +165,15 @@ export default class Game extends Phaser.Scene {
     private addSkillsnItems(x: number, y: number, neko: any) {
         const ne = this.aliveNekos.get(neko.id);
         neko.skills.forEach((value, idx) => {
-            let tmp = this.add.rectangle(x - 60, y + 85 * (idx + 1) + 55, 80, 80, 0x9d8e00).setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
+            let tmp = this.add.rectangle(x - 55, y + 85 * (idx + 1) + 55, 80, 80, 0x9d8e00).setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
                 if (ne.mana < value.metadata["mana"]) {
                     this.notification?.setText("YOUR NEKO DOESN'T HAVE ENOUGH MANA TO USE THIS SKILL");
                 } else {
+                    ne.skills.forEach(sk => {
+                        sk.setAngle(90);
+                    });
                     tmp.setAngle(45);
-                    this.notification?.setText("NOW PICK ONLY ONE ENEMY");
+                    this.notification?.setText(`YOU ARE CHOOSING ${value.name}, NOW PICK ONLY ONE ENEMY`);
                     this.skillInfo.actionType = EActionEntityTypePvERoom.SKILL;
                     this.skillInfo.actionId = value.id;
                     this.skillMana = value.metadata["mana"];
@@ -178,7 +183,7 @@ export default class Game extends Phaser.Scene {
             tmp.disableInteractive();
             ne.skills.push(tmp);
             this.add.text(x - 90, y + 75 * (idx + 1) + 55, `${value.name}`);
-            this.add.text(x - 90, y + 95 * (idx + 1) + 55, `Mana:${value.metadata["mana"]}`);
+            this.add.text(x - 90, y + 75 * (idx + 1) + 75, `Mana:${value.metadata["mana"]}`);
         })
         // neko.skills.forEach((value, idx) => {
         //     this.add.rectangle(x + 60, y + 85 * (idx + 1) + 55, 80, 80, 0xa020f0).setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
@@ -193,7 +198,7 @@ export default class Game extends Phaser.Scene {
         let y = 100;
 
         queue.forEach((action, idx) => {
-            this.add.rectangle(x, y + idx * 100, 80, 80, idx === currIdx ? 0xc97aa6 : 0x49643d);
+            this.add.rectangle(x, y + idx * 100, 80, 80, idx === currIdx ? 0x03A696 : 0x012E40);
             const name = action.type === EEntityTypePvERoom.NEKO ? `${this.aliveNekos.get(action.id)?.name || "DEAD"}` : `${this.aliveEnemies.get(action.id)?.name || "DEAD"}`;
             this.add.text(x - 35, y + idx * 100, name);
 
@@ -220,7 +225,7 @@ export default class Game extends Phaser.Scene {
         })
 
         this.aliveEnemies.forEach((ee, key) => {
-            ee.object.setVisible(false);
+            ee.star_object.setVisible(false);
         })
         // this.aliveNekos.forEach((ne, key) => {
         //     ne.object.setVisible(false);
@@ -239,7 +244,7 @@ export default class Game extends Phaser.Scene {
             effectNeko.health_text.setText(`Health: ${effectNeko.health}`);
             effectNeko.mana_text.setText(`Mana: ${effectNeko.mana}`);
             if (effectNeko.health <= 0) {
-                effectNeko.object.setVisible(true);
+                effectNeko.circle_object.setVisible(false);
                 effectNeko.health_text.setText('DEAD');
                 this.aliveNekos.delete(ne.id);
             }
@@ -251,7 +256,8 @@ export default class Game extends Phaser.Scene {
             effectEnemy.atk += ee.atk;
             effectEnemy.health_text.setText(`Health: ${effectEnemy.health}`);
             if (effectEnemy.health <= 0) {
-                effectEnemy.object.setVisible(true);
+                effectEnemy.circle_object.setVisible(false);
+                effectEnemy.star_object.setVisible(false);
                 effectEnemy.health_text.setText('DEAD');
                 this.aliveEnemies.delete(ee.id);
             }
