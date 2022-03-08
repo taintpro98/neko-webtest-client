@@ -173,7 +173,7 @@ export default class Game extends Phaser.Scene {
                         sk.setAngle(90);
                     });
                     tmp.setAngle(45);
-                    this.notification?.setText(`YOU ARE CHOOSING ${value.name}, NOW PICK ONLY ONE ENEMY`);
+                    this.notification?.setText(`${value.name} with atk: ${value.metadata["atk"]}, def: ${value.metadata["def"]}, NOW PICK ONLY ONE ENEMY`);
                     this.skillInfo.actionType = EActionEntityTypePvERoom.SKILL;
                     this.skillInfo.actionId = value.id;
                     this.skillMana = value.metadata["mana"];
