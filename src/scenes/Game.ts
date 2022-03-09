@@ -16,8 +16,8 @@ export default class Game extends Phaser.Scene {
     private aliveEnemies: Map<string, any> = new Map();
     private aliveNekos: Map<string, any> = new Map();
     private actionClock?: CountdownController;
-    // private actionButton?: Phaser.GameObjects.Rectangle;
     private notification?: Phaser.GameObjects.Text;
+    private firstRenderQueue: boolean = true;
 
     constructor() {
         super('game');
@@ -54,7 +54,8 @@ export default class Game extends Phaser.Scene {
                 health_text: null,
                 mana_text: null,
                 star_object: null,
-                circle_object: null
+                circle_object: null,
+                queue_object: null
             })
         })
         roomNekos.forEach(n => {
@@ -69,6 +70,7 @@ export default class Game extends Phaser.Scene {
                 mana_text: null,
                 star_object: null,
                 circle_object: null,
+                queue_object: null,
                 skills: [],
                 items: []
             })
@@ -106,7 +108,9 @@ export default class Game extends Phaser.Scene {
                     this.server?.sendSkillInformation(this.skillInfo);
                     this.notification?.setText("SENDING YOUR ACTION...");
                     this.actionClock?.stop();
-                });;
+
+                    ne.queue_object.fillColor = 0x012E40;
+                });
                 ee.star_object = this.add.star(x, y, 4, 8, 60, 0xff0000);
                 ee.star_object.setVisible(false);
                 // ee.circle_object.setDepth(0.5)
@@ -197,16 +201,36 @@ export default class Game extends Phaser.Scene {
         let x = 300;
         let y = 100;
 
-        queue.forEach((action, idx) => {
-            this.add.rectangle(x, y + idx * 100, 80, 80, idx === currIdx ? 0x03A696 : 0x012E40);
+        const pickColor = (index: number) => {
+            if (index === currIdx) return 0xF28705;
+            else return 0x038C8C;
+        }
+
+        const getCharacter = (action: any) => {
+            if (action.type === EEntityTypePvERoom.ENEMY) return this.aliveEnemies.get(action.id);
+            else return this.aliveNekos.get(action.id);
+        }
+
+        const drawQueue = (action: any, idx: number) => {
+            let character = getCharacter(action);
+            character.queue_object = this.add.rectangle(x, y + idx * 100, 80, 80, pickColor(idx));
             const name = action.type === EEntityTypePvERoom.NEKO ? `${this.aliveNekos.get(action.id)?.name || "DEAD"}` : `${this.aliveEnemies.get(action.id)?.name || "DEAD"}`;
             this.add.text(x - 35, y + idx * 100, name);
+        }
+
+        queue.forEach((action, idx) => {
+            if (this.firstRenderQueue) {
+                drawQueue(action, idx);
+            } else {
+                if (idx === currIdx) {
+                    drawQueue(action, idx);
+                }
+            }
 
             if (action.type === EEntityTypePvERoom.NEKO) {
                 let chosenOne = this.aliveNekos.get(action.id);
                 if (idx === currIdx) {
                     this.actionClock?.start(this.handleCountdownFinished.bind(this), 15000);
-                    // this.actionButton?.setInteractive();
                     this.notification?.setText("CHOOSE A SKILL OR AN ITEM FOR NEKO");
                     this.skillInfo.nekoId = action.id;
                     chosenOne?.skills.forEach(sk => {
@@ -232,6 +256,8 @@ export default class Game extends Phaser.Scene {
         // })
         this.skillInfo.targets = [];
         this.skillInfo.actionType = EActionEntityTypePvERoom.NONE;
+
+        this.firstRenderQueue = false;
     }
 
     private async updateResults(effect: any) {
