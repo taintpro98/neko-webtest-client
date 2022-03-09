@@ -89,21 +89,26 @@ export default class Server {
                     break;
                 case EMessagePVERoom.StartRound:
                     console.log("START ROUND");
-                    this.events.emit('notification', 'START ROUND');
+                    this.events.emit('notification', "START ROUND");
                     break;
                 case EMessagePVERoom.CalculateQueue:
                     console.log("GET A QUEUE");
-                    this.events.emit('notification', 'GET A QUEUE');
+                    this.events.emit('notification', "GOT A QUEUE");
+
                     this.queue = [...message.params.turns].reverse();
                     this.currIdx = 5 - message.params.index;
+                    this.events.emit('queue-changed', this.queue, this.currIdx);
                     setTimeout(() => {
-                        this.startTurn();
-                        this.events.emit('queue-changed', this.queue, this.currIdx);
+                        this.sendStartTurn();
+                        this.events.emit('notification', "START TURN");
+
+                        this.events.emit('start-turn');
                     }, 2000);
                     break;
                 case EMessagePVERoom.Result:
                     console.log("RESULTS");
-                    this.events.emit('notification', 'RESULTS AND ANIMATION');
+                    this.events.emit('notification', "RESULTS");
+                    
                     this.events.emit('update-results', message.params.effect);
                     break;
                 case EMessagePVERoom.EndTurn:
@@ -153,9 +158,12 @@ export default class Server {
         this.events.on('queue-changed', cb, context);
     }
 
-    startTurn() {
+    onStartTurn(cb: () => void, context?: any) {
+        this.events.on('start-turn', cb, context);
+    }
+
+    sendStartTurn() {
         console.log("START TURN");
-        this.events.emit("notification", "START TURN");
         if (!this.room) return;
         this.room.send(EMessagePVERoom.StartTurn, this.currIdx);
     }
