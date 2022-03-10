@@ -126,7 +126,7 @@ export default class Game extends Phaser.Scene {
 
                 this.add.text(x - 80, y, `Boss ${enemies[idx].name}`);
                 ee.health_text = this.add.text(x - 80, y + 20, `Health: ${enemies[idx].metadata["health"]}`);
-                ee.health_effect_text = this.add.text(x - 50, y - 40, "");
+                ee.health_effect_text = this.add.text(x - 50, y - 40, "", { color: 'red' });
             }
             if (idx === 5) {
                 this.notification = this.add.text(480, 350, '* NOTIFICATION: ', { color: 'red' });
@@ -147,7 +147,7 @@ export default class Game extends Phaser.Scene {
                 ne.star_object.setVisible(false);
                 this.add.text(x - 80, y, `Neko ${roomNekos[idx - 6].name}`);
                 ne.health_text = this.add.text(x - 80, y + 20, `Health: ${roomNekos[idx - 6].metadata["health"]}`);
-                ne.health_effect_text = this.add.text(x - 50, y - 40, "");
+                ne.health_effect_text = this.add.text(x - 50, y - 40, "", { color: 'red' });
                 ne.mana_text = this.add.text(x - 70, y + 40, `Mana: ${roomNekos[idx - 6].metadata["mana"]}`);
                 this.addSkillsnItems(x, y, roomNekos[idx - 6]);
             }
@@ -228,10 +228,12 @@ export default class Game extends Phaser.Scene {
 
         [...this.aliveNekos.values()].forEach(ne => {
             ne.health_effect_text.setText("");
+            ne.star_object.setVisible(false);
         });
 
         [...this.aliveEnemies.values()].forEach(ee => {
             ee.health_effect_text.setText("");
+            ee.star_object.setVisible(false);
         });
 
         const pickColor = (index: number) => {
@@ -320,6 +322,7 @@ export default class Game extends Phaser.Scene {
             const effectNeko = this.aliveNekos.get(ne.id);
             effectNeko.health += ne.health;
             effectNeko.health_effect_text.setText(ne.health ? ne.health : '');
+            effectNeko.star_object.setVisible(ne.health);
 
             effectNeko.def += ne.def;
             effectNeko.atk += ne.atk;
@@ -328,8 +331,9 @@ export default class Game extends Phaser.Scene {
             effectNeko.mana_text.setText(`Mana: ${effectNeko.mana}`);
             if (effectNeko.health <= 0) {
                 effectNeko.circle_object.setVisible(false);
-                effectNeko.health_text.setText('DEAD');
-                this.add.star(effectNeko.queue_object.x, effectNeko.queue_object.y, 4, 8, 60, STAR_COLOR);
+                effectNeko.health_effect_text.setVisible(false);
+                effectNeko.star_object.setVisible(false);
+                this.add.star(effectNeko.queue_object.x, effectNeko.queue_object.y, 4, 8, 30, STAR_COLOR);
                 this.aliveNekos.delete(ne.id);
             }
         })
@@ -344,8 +348,8 @@ export default class Game extends Phaser.Scene {
             if (effectEnemy.health <= 0) {
                 effectEnemy.circle_object.setVisible(false);
                 effectEnemy.star_object.setVisible(false);
-                effectEnemy.health_text.setText('DEAD');
-                this.add.star(effectEnemy.queue_object.x, effectEnemy.queue_object.y, 4, 8, 60, STAR_COLOR);
+                effectEnemy.health_effect_text.setText(false);
+                this.add.star(effectEnemy.queue_object.x, effectEnemy.queue_object.y, 4, 8, 30, STAR_COLOR);
                 this.aliveEnemies.delete(ee.id);
             }
         })

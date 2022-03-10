@@ -1,4 +1,4 @@
-export const CIRCLE_OBJECT_NEKO_COLOR = 0xFFC0CB;
+export const CIRCLE_OBJECT_NEKO_COLOR = 0xfc80c7;
 export const CIRCLE_OBJECT_ENEMY_COLOR = 0x0000ff;
 export const BATTLE_FIELD_COLOR = 0xffffff;
 export const STAR_COLOR = 0xff0000;
