@@ -108,7 +108,7 @@ export default class Server {
                 case EMessagePVERoom.Result:
                     console.log("RESULTS");
                     this.events.emit('notification', "RESULTS");
-                    
+
                     this.events.emit('update-results', message.params.effect);
                     break;
                 case EMessagePVERoom.EndTurn:

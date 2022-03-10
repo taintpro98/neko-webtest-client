@@ -79,7 +79,7 @@ export default class Game extends Phaser.Scene {
                 circle_object: null,
                 queue_object: null,
                 skill_objects: [],
-                skills:  [],
+                skills: [],
                 items: []
             })
         })
@@ -99,6 +99,9 @@ export default class Game extends Phaser.Scene {
             if (idx === 0 || idx === 1 || idx === 2) {
                 const ee = this.aliveEnemies.get(enemies[idx].id);
                 ee.circle_object = this.add.circle(x, y, 85, CIRCLE_OBJECT_ENEMY_COLOR).setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
+                    [...this.aliveEnemies.values()].forEach(ee => {
+                        ee.circle_object.disableInteractive();
+                    })
                     ee.star_object.setVisible(true);
                     this.skillInfo.targets?.push({
                         id: ee.id,
@@ -119,6 +122,7 @@ export default class Game extends Phaser.Scene {
                 });
                 ee.star_object = this.add.star(x, y, 4, 8, 60, STAR_COLOR);
                 ee.star_object.setVisible(false);
+                ee.circle_object.disableInteractive();
 
                 this.add.text(x - 80, y, `Boss ${enemies[idx].name}`);
                 ee.health_text = this.add.text(x - 80, y + 20, `Health: ${enemies[idx].metadata["health"]}`);
@@ -289,11 +293,14 @@ export default class Game extends Phaser.Scene {
         if (this.skillInfo.nekoId) {
             this.actionClock?.start(this.handleCountdownFinished.bind(this), 15000);
             this.setGuideline("CHOOSE A SKILL OR AN ITEM FOR NEKO");
+            [...this.aliveEnemies.values()].forEach(ee => {
+                ee.circle_object.setInteractive();
+            })
             this.currCharacter.skill_objects.forEach((sk, idx) => {
                 sk.setInteractive();
                 sk.setVisible(true);
                 sk.setAngle(90);
-                if(this.currCharacter.mana < this.currCharacter.skills[idx].metadata["mana"]){
+                if (this.currCharacter.mana < this.currCharacter.skills[idx].metadata["mana"]) {
                     sk.fillColor = UNAVAILABLE_SKILL_BUTTON_COLOR;
                 }
             });
