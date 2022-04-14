@@ -165,10 +165,10 @@ export default class Game extends Phaser.Scene {
               type: EEntityTypePvERoom.ENEMY,
             });
             const ne = this.aliveNekos.get(this.skillInfo.nekoId);
-            if (this.skillInfo.actionType === EActionEntityTypePvERoom.SKILL) {
-              ne.mana -= this.skillMana;
-              ne.mana_text.setText(`Mana: ${ne.mana}`);
-            }
+            // if (this.skillInfo.actionType === EActionEntityTypePvERoom.SKILL) {
+            //   ne.mana -= this.skillMana;
+            //   ne.mana_text.setText(`Mana: ${ne.mana}`);
+            // }
             ne.skill_objects.forEach((sk) => {
               sk.setAngle(90);
               sk.disableInteractive();
