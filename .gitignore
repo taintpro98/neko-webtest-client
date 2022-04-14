@@ -1,0 +1,13 @@
+node_modules
+.DS_Store
+.env
+/logs
+loadtest.log
+loadtest.log.bkp
+/build
+/lib
+dist/
+.parcel-cache
+.env
+yarn.lock
+package-lock.json
