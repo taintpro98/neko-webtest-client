@@ -66,12 +66,12 @@ export default class Server {
         skills.push({
           id: value.id,
           name: value.name,
+          turn_effect: value.turn_effect,
+          target: value.target,
           metadata: {
-            function: value.metadata.function,
-            atk: value.metadata.atk,
-            speed: value.metadata.speed,
-            def: value.metadata.def,
+            numTurns: value.metadata.numTurns,
             mana: value.metadata.mana,
+            // actions: value.metadata.actions,
           },
         });
       });
@@ -85,6 +85,17 @@ export default class Server {
           health: neko.metadata.health,
           speed: neko.metadata.speed,
           mana: neko.metadata.mana,
+          m_atk: neko.metadata.m_atk,
+          m_def: neko.metadata.m_def,
+        },
+        currentMetadata: {
+          atk: neko.metadata.atk,
+          def: neko.metadata.def,
+          health: neko.metadata.health,
+          speed: neko.metadata.speed,
+          mana: neko.metadata.mana,
+          m_atk: neko.metadata.m_atk,
+          m_def: neko.metadata.m_def,
         },
       });
     };
@@ -168,6 +179,11 @@ export default class Server {
 
           this.events.emit("update-results", message.effect);
           break;
+        case EMessagePVERoom.EndResult:
+          console.log("END RESULTS");
+          this.events.emit("notification", "END RESULTS");
+          this.events.emit("update-endresults", message.effect);
+          break;
         case EMessagePVERoom.EndTurn:
           console.log("END TURN");
           this.events.emit("notification", `END TURN ${message.turn}`);
@@ -250,6 +266,10 @@ export default class Server {
     this.events.on("update-results", cb, context);
   }
 
+  updateEndResults(cb: (effect: TEntityEffect) => void, context?: any) {
+    this.events.on("update-endresults", cb, context);
+  }
+
   sendDoneAnimation() {
     if (!this.room) return;
     this.room.send(EMessagePVERoom.DoneAnimation, { x: 1 });
@@ -257,9 +277,8 @@ export default class Server {
   endRound(cb: () => void, context?: any) {
     this.events.on("end-round", cb, context);
   }
-  endGame(cb: () => void, context?:any){
+  endGame(cb: () => void, context?: any) {
     this.events.on("end-game", cb, context);
-
   }
 
   notification(cb: (alert: string) => void, context?: any) {

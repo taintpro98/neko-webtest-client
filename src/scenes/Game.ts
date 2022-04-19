@@ -111,6 +111,8 @@ export default class Game extends Phaser.Scene {
       this.aliveNekos.set(n.id, {
         id: n.id,
         name: n.name,
+        metadata: n.metadata,
+        currentMetadata: n.currentMetadata,
         health: n.metadata["health"],
         atk: n.metadata["atk"],
         def: n.metadata["def"],
@@ -446,7 +448,7 @@ export default class Game extends Phaser.Scene {
       const name =
         action.type === EEntityTypePvERoom.NEKO
           ? `${
-              this.aliveNekos.get(action.id)?.name ||                                                                         
+              this.aliveNekos.get(action.id)?.name ||
               `DEAD ${this.initialNekos.get(action.id)?.name}`
             }`
           : `${

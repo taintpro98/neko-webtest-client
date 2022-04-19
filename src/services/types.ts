@@ -12,6 +12,7 @@ export enum EMessagePVERoom {
   EndGame = "EndGame",
   Left = "Left",
   Error = "Error",
+  EndResult = "EndResult"
 }
 
 export enum EActionEntityTypePvERoom {
