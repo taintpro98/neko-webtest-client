@@ -17,6 +17,7 @@ import {
   TPlanningInfoPVERoom,
   TEntityEffect,
   EActionEntityTypePvERoom,
+  ETargetType,
 } from "../services/types";
 import CountdownController from "./CountdownController";
 import {
@@ -35,7 +36,6 @@ export default class Game extends Phaser.Scene {
     targets: [],
     actionId: "",
   };
-  private skillMana: number = 0;
   private initialEnemies: Map<string, any> = new Map();
   private initialNekos: Map<string, any> = new Map();
   private aliveEnemies: Map<string, any> = new Map();
@@ -88,20 +88,35 @@ export default class Game extends Phaser.Scene {
   }
 
   private createMap(roomNekos: any[], enemies: any[], consumptionItems: any[]) {
+    this.add.renderTexture;
     enemies.forEach((e) => {
       this.aliveEnemies.set(e.id, {
         id: e.id,
         name: e.name,
-        health: e.metadata["health"],
-        atk: e.metadata["atk"],
-        def: e.metadata["def"],
-        mana: e.metadata["mana"],
+        metadata: e.metadata,
+        currentMetadata: e.currentMetadata,
         health_text: null,
-        health_effect_text: null,
+        health_text_effect: null,
+
+        atk_text: null,
+        atk_text_effect: null,
+
+        m_atk_text: null,
+        m_atk_text_effect: null,
+
+        def_text: null,
+        def_text_effect: null,
+
+        m_def_text: null,
+        m_def_effect_text: null,
+
         mana_text: null,
+        mana_text_effect: null,
+        effect_area: null,
         star_object: null,
         circle_object: null,
         queue_object: null,
+        skills: [],
       });
       this.turnQueues.set(e.id, { object: null, text: null });
       this.initialEnemies.set(e.id, { id: e.id, name: e.name });
@@ -113,13 +128,26 @@ export default class Game extends Phaser.Scene {
         name: n.name,
         metadata: n.metadata,
         currentMetadata: n.currentMetadata,
-        health: n.metadata["health"],
-        atk: n.metadata["atk"],
-        def: n.metadata["def"],
-        mana: n.metadata["mana"],
+
         health_text: null,
-        health_effect_text: null,
+        health_text_effect: null,
+
+        atk_text: null,
+        atk_text_effect: null,
+
+        m_atk_text: null,
+        m_atk_text_effect: null,
+
+        def_text: null,
+        def_text_effect: null,
+
+        m_def_text: null,
+        m_def_effect_text: null,
+
         mana_text: null,
+        mana_text_effect: null,
+        effect_area: null,
+
         star_object: null,
         circle_object: null,
         queue_object: null,
@@ -144,7 +172,7 @@ export default class Game extends Phaser.Scene {
     const size = 196;
 
     let x = width * 0.5 - size;
-    let y = height * 0.2 - size;
+    let y = height * 0.2 - 196;
 
     map.forEach((cellState, idx) => {
       if (idx > 0 && idx % 3 === 0) {
@@ -183,15 +211,46 @@ export default class Game extends Phaser.Scene {
         ee.star_object.setVisible(false);
         ee.circle_object.disableInteractive();
 
-        this.add.text(x - 80, y, `Boss ${enemies[idx].name}`);
-        ee.health_text = this.add.text(
-          x - 80,
-          y + 20,
-          `Health: ${enemies[idx].metadata["health"]}`
-        );
-        ee.health_effect_text = this.add.text(x - 50, y - 40, "", {
-          color: "red",
+        this.add.text(x - 75, y - 50, `Boss ${enemies[idx].name}`, {
+          fontSize: "14px",
         });
+        ee.health_text = this.add.text(
+          x - 75,
+          y - 35,
+          `Health: ${enemies[idx].metadata["health"]}`,
+          { fontSize: "14px" }
+        );
+        ee.atk_text = this.add.text(
+          x - 75,
+          y - 20,
+          `ATK: ${enemies[idx].currentMetadata["atk"]}`,
+          { fontSize: "14px" }
+        );
+        ee.def_text = this.add.text(
+          x - 75,
+          y - 5,
+          `DEF: ${enemies[idx].currentMetadata["def"]}`,
+          { fontSize: "14px" }
+        );
+        ee.m_atk_text = this.add.text(
+          x - 75,
+          y + 10,
+          `M_ATK: ${enemies[idx].currentMetadata["m_atk"]}`,
+          { fontSize: "14px" }
+        );
+        ee.m_def_text = this.add.text(
+          x - 75,
+          y + 25,
+          `M_DEF: ${enemies[idx].currentMetadata["m_def"]}`,
+          { fontSize: "14px" }
+        );
+        ee.mana_text = this.add.text(
+          x - 75,
+          y + 40,
+          `Mana: ${enemies[idx].metadata["mana"]}`,
+          { fontSize: "14px" }
+        );
+        this.addEnemyEffect(x, y, enemies[idx]);
       }
       if (idx === 5) {
         this.notification = this.add.text(480, 350, "* NOTIFICATION: ", {
@@ -206,31 +265,64 @@ export default class Game extends Phaser.Scene {
       }
       if (idx === 6 || idx === 7 || idx === 8) {
         const ne = this.aliveNekos.get(roomNekos[idx - 6].id);
-        ne.circle_object = this.add.circle(x, y, 85, CIRCLE_OBJECT_NEKO_COLOR);
-        // .setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
-        //     ne.object.setVisible(true);
-        //     this.skillInfo.targets?.push({
-        //         id: ne.id,
-        //         type: EEntityTypePvERoom.NEKO
-        //     });
-        // });
+        ne.circle_object = this.add
+          .circle(x, y, 85, CIRCLE_OBJECT_NEKO_COLOR)
+          .setInteractive()
+          .on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
+            [...this.aliveNekos.values()].forEach((ee) => {
+              ee.circle_object.disableInteractive();
+            });
+            ne.star_object.setVisible(true);
+            this.skillInfo.targets?.push({
+              id: ne.id,
+              type: EEntityTypePvERoom.NEKO,
+            });
+            this.server?.sendSkillInformation(this.skillInfo);
+            this.setNotification("SENDING YOUR ACTION...");
+            this.actionClock?.stop();
+          });
         ne.star_object = this.add.star(x, y, 4, 8, 60, STAR_COLOR);
         ne.star_object.setVisible(false);
-        this.add.text(x - 80, y, `Neko ${roomNekos[idx - 6].name}`);
-        ne.health_text = this.add.text(
-          x - 80,
-          y + 20,
-          `Health: ${roomNekos[idx - 6].metadata["health"]}`
-        );
-        ne.health_effect_text = this.add.text(x - 50, y - 40, "", {
-          color: "red",
+        this.add.text(x - 75, y - 50, `${roomNekos[idx - 6].name}`, {
+          fontSize: "14px",
         });
+        ne.health_text = this.add.text(
+          x - 75,
+          y - 35,
+          `Health: ${roomNekos[idx - 6].metadata["health"]}`,
+          { fontSize: "14px" }
+        );
+        ne.atk_text = this.add.text(
+          x - 75,
+          y - 20,
+          `ATK: ${roomNekos[idx - 6].currentMetadata["atk"]}`,
+          { fontSize: "14px" }
+        );
+        ne.def_text = this.add.text(
+          x - 75,
+          y - 5,
+          `DEF: ${roomNekos[idx - 6].currentMetadata["def"]}`,
+          { fontSize: "14px" }
+        );
+        ne.m_atk_text = this.add.text(
+          x - 75,
+          y + 10,
+          `M_ATK: ${roomNekos[idx - 6].currentMetadata["m_atk"]}`,
+          { fontSize: "14px" }
+        );
+        ne.m_def_text = this.add.text(
+          x - 75,
+          y + 25,
+          `M_DEF: ${roomNekos[idx - 6].currentMetadata["m_def"]}`,
+          { fontSize: "14px" }
+        );
         ne.mana_text = this.add.text(
           x - 70,
           y + 40,
           `Mana: ${roomNekos[idx - 6].metadata["mana"]}`
         );
         this.addSkillsnItems(x, y, roomNekos[idx - 6]);
+        this.addNekoEffect(x, y, roomNekos[idx - 6]);
       }
       x += size;
     });
@@ -255,8 +347,10 @@ export default class Game extends Phaser.Scene {
     this.server?.onQueueChanged(this.addQueue, this);
     this.server?.onStartTurn(this.startTurn, this);
     this.server?.updateResults(this.updateResults, this);
+    this.server?.updateEndResults(this.updateEndResult, this);
     this.server?.notification(this.setNotification, this);
     this.server?.onErrorAction(this.setError, this);
+    this.server?.endTurn(this.endTurn, this);
     this.server?.endRound(() => {
       this.currentEntitiesRound.clear();
       this.buttonStartRound?.setVisible(true);
@@ -331,7 +425,6 @@ export default class Game extends Phaser.Scene {
             this.setGuideline("NOW PICK ONLY ONE ENEMY");
             this.skillInfo.actionType = EActionEntityTypePvERoom.ITEM;
             this.skillInfo.actionId = value.id;
-            this.skillMana = 20;
           });
         tmp.setVisible(false);
         tmp.disableInteractive();
@@ -370,12 +463,20 @@ export default class Game extends Phaser.Scene {
             });
             tmp.setAngle(45);
             this.setCharacterInfo(
-              `${value.name} with atk: ${value.metadata["atk"]}, def: ${value.metadata["def"]}`
+              `${value.name} turn_effect: ${value.turn_effect} target: ${value.target}`
             );
-            this.setGuideline("NOW PICK ONLY ONE ENEMY");
+            this.setGuideline(
+              `$NOW PICK ONLY ONE ${
+                value.target === ETargetType.ALLALLIES ||
+                value.target === ETargetType.ALLY
+                  ? "NEKO"
+                  : "ENEMY"
+              }`
+            );
+            this.skillInfo.target = value.target;
             this.skillInfo.actionType = EActionEntityTypePvERoom.SKILL;
+
             this.skillInfo.actionId = value.id;
-            this.skillMana = value.metadata["mana"];
           }
         });
       tmp.setVisible(false);
@@ -397,6 +498,117 @@ export default class Game extends Phaser.Scene {
     // })
   }
 
+  private addNekoEffect(x: number, y: number, neko: any) {
+    const ne = this.aliveNekos.get(neko.id);
+    ne.effect_area = this.add.rectangle(
+      x - 20,
+      y + 200,
+      150,
+      150,
+      BATTLE_FIELD_COLOR
+    );
+    ne.health_text_effect = this.add.text(x - 90, y + 130, "", {
+      color: "red",
+      fontSize: "12px",
+    });
+    ne.atk_text_effect = this.add.text(x - 90, y + 145, "", {
+      color: "red",
+      fontSize: "12px",
+    });
+    ne.def_text_effect = this.add.text(x - 90, y + 160, "", {
+      color: "red",
+      fontSize: "12px",
+    });
+    ne.def_text_effect = this.add.text(x - 90, y + 175, "", {
+      color: "red",
+      fontSize: "12px",
+    });
+    ne.m_atk_text_effect = this.add.text(x - 90, y + 190, "", {
+      color: "red",
+      fontSize: "12px",
+    });
+    ne.m_def_effect_text = this.add.text(x - 90, y + 205, "", {
+      color: "red",
+      fontSize: "12px",
+    });
+    ne.mana_text_effect = this.add.text(x - 90, y + 220, "", {
+      color: "red",
+      fontSize: "12px",
+    });
+    ne.effect_area.setVisible(false);
+    ne.health_text_effect.setVisible(false);
+    ne.atk_text_effect.setVisible(false);
+    ne.def_text_effect.setVisible(false);
+    ne.m_atk_text_effect.setVisible(false);
+    ne.m_def_effect_text.setVisible(false);
+    ne.mana_text_effect.setVisible(false);
+  }
+
+  private addEnemyEffect(x: number, y: number, enemy: any) {
+    const e = this.aliveEnemies.get(enemy.id);
+    e.effect_area = this.add.rectangle(
+      x - 20,
+      y - 150,
+      150,
+      100,
+      BATTLE_FIELD_COLOR
+    );
+
+    e.health_text_effect = this.add.text(x - 90, y - 130, "", {
+      color: "red",
+      fontSize: "12px",
+    });
+    e.atk_text_effect = this.add.text(x - 90, y - 145, "", {
+      color: "red",
+      fontSize: "12px",
+    });
+    e.def_text_effect = this.add.text(x - 90, y - 160, "", {
+      color: "red",
+      fontSize: "12px",
+    });
+    e.m_atk_text_effect = this.add.text(x - 90, y - 175, "", {
+      color: "red",
+      fontSize: "12px",
+    });
+    e.m_def_effect_text = this.add.text(x - 90, y - 190, "", {
+      color: "red",
+      fontSize: "12px",
+    });
+    e.mana_text_effect = this.add.text(x - 90, y - 205, "", {
+      color: "red",
+      fontSize: "12px",
+    });
+    e.effect_area.setVisible(false);
+    e.health_text_effect.setVisible(false);
+    e.atk_text_effect.setVisible(false);
+    e.def_text_effect.setVisible(false);
+    e.m_atk_text_effect.setVisible(false);
+    e.m_def_effect_text.setVisible(false);
+    e.mana_text_effect.setVisible(false);
+  }
+
+  private isShowEnemyEffect(ne: any, visible: boolean) {
+    const enemy = this.aliveEnemies.get(ne.id);
+    enemy.effect_area.setVisible(visible);
+    enemy.health_text_effect.setVisible(visible);
+    enemy.atk_text_effect.setVisible(visible);
+    enemy.def_text_effect.setVisible(visible);
+    enemy.m_atk_text_effect.setVisible(visible);
+    enemy.m_def_effect_text.setVisible(visible);
+    enemy.mana_text_effect.setVisible(visible);
+  }
+
+  private isShowNekoEffect(ne: any, visible: boolean) {
+    const neko = this.aliveNekos.get(ne.id);
+    ne.effect_area.setVisible(visible);
+    ne.health_text_effect.setVisible(visible);
+    ne.atk_text_effect.setVisible(visible);
+    ne.def_text_effect.setVisible(visible);
+    ne.m_atk_text_effect.setVisible(visible);
+    ne.m_def_effect_text.setVisible(visible);
+    ne.mana_text_effect.setVisible(visible);
+  }
+
   private addQueue(queue: any[], currIdx: number) {
     let x = 300;
     let y = 100;
@@ -405,12 +617,10 @@ export default class Game extends Phaser.Scene {
     this.currentEntitiesRound.add(queue[currIdx].id);
 
     this.aliveNekos.forEach((ne) => {
-      ne.health_effect_text.setText("");
       ne.star_object.setVisible(false);
     });
 
     this.aliveEnemies.forEach((ee) => {
-      ee.health_effect_text.setText("");
       ee.star_object.setVisible(false);
     });
     const getCharacter = (action: any) => {
@@ -491,11 +701,20 @@ export default class Game extends Phaser.Scene {
     this.skillInfo.targets = [];
     this.skillInfo.actionType = EActionEntityTypePvERoom.NONE;
     this.setCharacterInfo(
-      `${this.currCharacter.name} with atk: ${this.currCharacter.atk}, def: ${this.currCharacter.def}`
+      `${this.currCharacter.name} with atk: ${
+        this.currCharacter.currentMetadata
+          ? this.currCharacter.currentMetadata.atk
+          : this.currCharacter.atk
+      }, def: ${
+        this.currCharacter.currentMetadata
+          ? this.currCharacter.currentMetadata.def
+          : this.currCharacter.def
+      }`
     );
   }
 
   private startTurn() {
+    this.buttonStartRound?.setVisible(false);
     if (this.skillInfo.nekoId) {
       this.actionClock?.start(
         this.handleCountdownFinished.bind(this),
@@ -510,6 +729,9 @@ export default class Game extends Phaser.Scene {
       [...this.aliveEnemies.values()].forEach((ee) => {
         ee.circle_object.setInteractive();
       });
+      // [...this.aliveNekos.values()].forEach((ee) => {
+      //   ee.circle_object.setInteractive();
+      // });
 
       this.currCharacter.skill_objects.forEach((sk, idx) => {
         sk.setInteractive();
@@ -545,18 +767,39 @@ export default class Game extends Phaser.Scene {
     let diedEnitties: any[] = [];
     await effect.nekos.forEach((ne: TEntityEffect) => {
       const effectNeko = this.aliveNekos.get(ne.id);
-      effectNeko.health += ne.health;
-      effectNeko.health_effect_text.setText(ne.health ? ne.health : "");
-      effectNeko.star_object.setVisible(ne.health);
+      this.isShowNekoEffect(effectNeko, false);
+      effectNeko.metadata.health += ne.health || 0;
+      // effectNeko.star_object.setVisible(ne.health);
 
-      effectNeko.def += ne.def;
-      effectNeko.atk += ne.atk;
-      effectNeko.mana += ne.mana ? ne.mana : 0;
-      effectNeko.health_text.setText(`Health: ${effectNeko.health}`);
-      effectNeko.mana_text.setText(`Mana: ${effectNeko.mana}`);
+      effectNeko.metadata.def += ne.def || 0;
+      effectNeko.metadata.atk += ne.atk || 0;
+      effectNeko.metadata.m_def += ne.m_def || 0;
+      effectNeko.metadata.m_atk += ne.m_atk || 0;
+      effectNeko.metadata.mana += ne.mana ? ne.mana : 0;
+
+      effectNeko.health_text.setText(`Health: ${effectNeko.metadata.health}`);
+      effectNeko.mana_text.setText(`Mana: ${effectNeko.metadata.mana}`);
+      effectNeko.m_atk_text.setText(`M_ATK: ${effectNeko.metadata.m_atk}`);
+      effectNeko.m_atk_text.setText(`M_DEF: ${effectNeko.metadata.m_def}`);
+      effectNeko.atk_text.setText(`ATK: ${effectNeko.metadata.atk}`);
+      effectNeko.def_text.setText(`DEF: ${effectNeko.metadata.def}`);
+
+      // set text effect
+      effectNeko.health_text_effect.setText(`Health: ${ne.health || 0}`);
+      effectNeko.mana_text_effect.setText(`Mana: ${ne.mana || 0}`);
+      effectNeko.atk_text_effect.setText(`ATK: ${ne.atk || 0}`);
+      effectNeko.m_atk_text_effect.setText(`M_ATK: ${ne.m_atk || 0}`);
+      effectNeko.def_text_effect.setText(`DEF: ${ne.def || 0}`);
+      effectNeko.m_def_effect_text.setText(`M_DEF: ${ne.m_def || 0}`);
+      this.isShowNekoEffect(effectNeko, true);
+      console.log(
+        `neko: ${effectNeko.id}: `,
+        effectNeko.metadata.health,
+        effectNeko.metadata.mana,
+        effectNeko.currentMetadata
+      );
       if (effectNeko.health <= 0) {
         effectNeko.circle_object.setVisible(false);
-        effectNeko.health_effect_text.setVisible(false);
         effectNeko.star_object.setVisible(false);
         const diedEntity = this.turnQueues.get(effectNeko.id);
         diedEntity.object.fillColor = DIED_ENTITY;
@@ -567,17 +810,162 @@ export default class Game extends Phaser.Scene {
     });
     await effect.enemies.forEach((ee: TEntityEffect) => {
       const effectEnemy = this.aliveEnemies.get(ee.id);
+      this.isShowEnemyEffect(effectEnemy, false);
 
-      effectEnemy.health += ee.health;
-      effectEnemy.health_effect_text.setText(ee.health ? ee.health : "");
+      effectEnemy.metadata.health += isNaN(ee.health || 0) ?? 0;
+      effectEnemy.metadata.def += ee.def || 0;
+      effectEnemy.metadata.atk += ee.atk || 0;
+      effectEnemy.metadata.m_def += ee.m_def || 0;
+      effectEnemy.metadata.m_atk += ee.m_atk || 0;
+      effectEnemy.metadata.mana += ee.mana ? ee.mana : 0;
 
-      effectEnemy.def += ee.def;
-      effectEnemy.atk += ee.atk;
-      effectEnemy.health_text.setText(`Health: ${effectEnemy.health}`);
+      effectEnemy.health_text.setText(`Health: ${effectEnemy.metadata.health}`);
+      effectEnemy.mana_text.setText(`Mana: ${effectEnemy.metadata.mana}`);
+      effectEnemy.m_atk_text.setText(`M_ATK: ${effectEnemy.metadata.m_atk}`);
+      effectEnemy.m_atk_text.setText(`M_DEF: ${effectEnemy.metadata.m_def}`);
+      effectEnemy.atk_text.setText(`ATK: ${effectEnemy.metadata.atk}`);
+      effectEnemy.def_text.setText(`DEF: ${effectEnemy.metadata.def}`);
+
+      // set text enemy effect
+      effectEnemy.health_text_effect.setText(`Health: ${ee.health || 0}`);
+      effectEnemy.mana_text_effect.setText(`Mana: ${ee.mana || 0}`);
+      effectEnemy.atk_text_effect.setText(`ATK: ${ee.atk || 0}`);
+      effectEnemy.m_atk_text_effect.setText(`M_ATK: ${ee.m_atk || 0}`);
+      effectEnemy.def_text_effect.setText(`DEF: ${ee.def || 0}`);
+      effectEnemy.m_def_effect_text.setText(`M_DEF: ${ee.m_def || 0}`);
+      this.isShowEnemyEffect(effectEnemy, true);
       if (effectEnemy.health <= 0) {
         effectEnemy.circle_object.setVisible(false);
         effectEnemy.star_object.setVisible(false);
-        effectEnemy.health_effect_text.setText(false);
+        const diedEntity = this.turnQueues.get(effectEnemy.id);
+        diedEntity.object.fillColor = DIED_ENTITY;
+        diedEntity.text.setText(`DEAD: ${effectEnemy.name}`);
+        this.aliveEnemies.delete(ee.id);
+        diedEnitties.push(effectEnemy.id);
+      }
+    });
+    if (!diedEnitties.includes(this.currCharacter.id)) {
+      currentCharQueue.object.fillColor = PROCESSED_QUEUE;
+    }
+    // this.setNotification("MAKING ANIMATION...");
+    // setTimeout(() => this.server?.sendDoneAnimation(), 3000);
+  }
+
+  private async updateEndResult(effect: any) {
+    console.log("effect: ", effect);
+    this.setNotification("END RESULTS AND ANIMATION");
+    this.actionClock?.stop();
+    this.error?.setVisible(false);
+
+    this.consumptionObject.forEach((value, key) => {
+      value.setVisible(false);
+      value.setInteractive();
+    });
+    const currentCharQueue = this.turnQueues.get(this.currCharacter.id);
+    this.currCharacter.circle_object.fillColor = this.skillInfo.nekoId
+      ? CIRCLE_OBJECT_NEKO_COLOR
+      : CIRCLE_OBJECT_ENEMY_COLOR;
+    this.nDoneCharacter = (this.nDoneCharacter + 1) % 6;
+    this.skillInfo.nekoId = "";
+    let diedEnitties: any[] = [];
+    await effect.nekos.forEach((ne: TEntityEffect) => {
+      const effectNeko = this.aliveNekos.get(ne.id);
+      this.isShowNekoEffect(effectNeko, false);
+      effectNeko.metadata.health += ne.health || 0;
+      effectNeko.star_object.setVisible(ne.health);
+
+      effectNeko.currentMetadata.def = effectNeko.metadata.def + (ne.def || 0);
+      effectNeko.currentMetadata.atk = effectNeko.metadata.atk + (ne.atk || 0);
+      effectNeko.currentMetadata.m_def =
+        effectNeko.metadata.m_def + (ne.m_def || 0);
+      effectNeko.currentMetadata.m_atk =
+        effectNeko.metadata.m_atk + (ne.m_atk || 0);
+      effectNeko.metadata.mana += ne.mana ? ne.mana : 0;
+
+      // set text for property
+      effectNeko.health_text.setText(`Health: ${effectNeko.metadata.health}`);
+      effectNeko.mana_text.setText(`Mana: ${effectNeko.metadata.mana}`);
+      effectNeko.m_atk_text.setText(
+        `M_ATK: ${effectNeko.currentMetadata.m_atk}`
+      );
+      effectNeko.m_atk_text.setText(
+        `M_DEF: ${effectNeko.currentMetadata.m_def}`
+      );
+      effectNeko.atk_text.setText(`ATK: ${effectNeko.currentMetadata.atk}`);
+      effectNeko.def_text.setText(`DEF: ${effectNeko.currentMetadata.def}`);
+      effectNeko.m_atk_text.setText(
+        `M_ATK: ${effectNeko.currentMetadata.m_atk}`
+      );
+      effectNeko.m_atk_text.setText(
+        `M_DEF: ${effectNeko.currentMetadata.m_def}`
+      );
+      effectNeko.atk_text.setText(`ATK: ${effectNeko.currentMetadata.atk}`);
+      effectNeko.def_text.setText(`DEF: ${effectNeko.currentMetadata.def}`);
+
+      // set text effect
+      effectNeko.health_text_effect.setText(`Health: ${ne.health || 0}`);
+      effectNeko.mana_text_effect.setText(`Mana: ${ne.mana || 0}`);
+      effectNeko.atk_text_effect.setText(`ATK: ${ne.atk || 0}`);
+      effectNeko.m_atk_text_effect.setText(`M_ATK: ${ne.m_atk || 0}`);
+      effectNeko.def_text_effect.setText(`DEF: ${ne.def || 0}`);
+      effectNeko.m_def_effect_text.setText(`M_DEF: ${ne.m_def || 0}`);
+      this.isShowNekoEffect(effectNeko, true);
+      console.log(
+        `neko: ${effectNeko.name - effectNeko.id}: `,
+        effectNeko.metadata.health,
+        effectNeko.metadata.mana,
+        effectNeko.currentMetadata
+      );
+
+      if (effectNeko.health <= 0) {
+        effectNeko.circle_object.setVisible(false);
+        effectNeko.star_object.setVisible(false);
+        const diedEntity = this.turnQueues.get(effectNeko.id);
+        diedEntity.object.fillColor = DIED_ENTITY;
+        diedEntity.text.setText(`DEAD: ${effectNeko.name}`);
+        this.aliveNekos.delete(ne.id);
+        diedEnitties.push(effectNeko.id);
+      }
+    });
+    await effect.enemies.forEach((ee: TEntityEffect) => {
+      const effectEnemy = this.aliveEnemies.get(ee.id);
+      this.isShowEnemyEffect(effectEnemy, false);
+
+      effectEnemy.metadata.health += ee.health || 0;
+      effectEnemy.currentMetadata.def =
+        effectEnemy.metadata.def + (ee.def || 0);
+      effectEnemy.currentMetadata.atk =
+        effectEnemy.metadata.atk + (ee.atk || 0);
+      effectEnemy.currentMetadata.m_def =
+        effectEnemy.metadata.m_def + (ee.m_def || 0);
+      effectEnemy.currentMetadata.m_atk =
+        effectEnemy.metadata.m_atk + (ee.m_atk || 0);
+      effectEnemy.metadata.mana += ee.mana ? ee.mana : 0;
+
+      // set text show enemy property
+      effectEnemy.health_text.setText(`Health: ${effectEnemy.metadata.health}`);
+      effectEnemy.mana_text.setText(`Mana: ${effectEnemy.metadata.mana}`);
+      effectEnemy.m_atk_text.setText(
+        `M_ATK: ${effectEnemy.currentMetadata.m_atk}`
+      );
+      effectEnemy.m_atk_text.setText(
+        `M_DEF: ${effectEnemy.currentMetadata.m_def}`
+      );
+      effectEnemy.atk_text.setText(`ATK: ${effectEnemy.currentMetadata.atk}`);
+      effectEnemy.def_text.setText(`DEF: ${effectEnemy.currentMetadata.def}`);
+
+      // set text effect
+      effectEnemy.health_text_effect.setText(`Health: ${ee.health || 0}`);
+      effectEnemy.mana_text_effect.setText(`Mana: ${ee.mana || 0}`);
+      effectEnemy.atk_text_effect.setText(`ATK: ${ee.atk || 0}`);
+      effectEnemy.m_atk_text_effect.setText(`M_ATK: ${ee.m_atk || 0}`);
+      effectEnemy.def_text_effect.setText(`DEF: ${ee.def || 0}`);
+      effectEnemy.m_def_effect_text.setText(`M_DEF: ${ee.m_def || 0}`);
+      this.isShowEnemyEffect(effectEnemy, true);
+
+      if (effectEnemy.health <= 0) {
+        effectEnemy.circle_object.setVisible(false);
+        effectEnemy.star_object.setVisible(false);
         const diedEntity = this.turnQueues.get(effectEnemy.id);
         diedEntity.object.fillColor = DIED_ENTITY;
         diedEntity.text.setText(`DEAD: ${effectEnemy.name}`);
@@ -590,5 +978,23 @@ export default class Game extends Phaser.Scene {
     }
     this.setNotification("MAKING ANIMATION...");
     setTimeout(() => this.server?.sendDoneAnimation(), 3000);
+  }
+
+  private endTurn() {
+    this.aliveNekos.forEach((e) => {
+      const ne = this.aliveNekos.get(e.id);
+      this.isShowNekoEffect(e, false);
+      if (ne.metadata.mana < 5) {
+        ne.metadata.mana += 1;
+      }
+    });
+
+    this.aliveEnemies.forEach((e) => {
+      const ne = this.aliveEnemies.get(e.id);
+      this.isShowEnemyEffect(e, false);
+      if (ne.metadata.mana < 5) {
+        ne.metadata.mana += 1;
+      }
+    });
   }
 }

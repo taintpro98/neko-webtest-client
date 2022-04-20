@@ -106,11 +106,12 @@ export default class Server {
         skills.push({
           id: value.id,
           name: value.name,
+          turn_effect: value.turn_effect,
+          target: value.target,
           metadata: {
-            function: value.metadata.function,
-            atk: value.metadata.atk,
-            speed: value.metadata.speed,
-            def: value.metadata.def,
+            numTurns: value.metadata.numTurns,
+            mana: value.metadata.mana,
+            // actions: value.metadata.actions,
           },
         });
       });
@@ -123,8 +124,20 @@ export default class Server {
         metadata: {
           atk: enemy.metadata.atk,
           def: enemy.metadata.def,
-          speed: enemy.metadata.speed,
           health: enemy.metadata.health,
+          speed: enemy.metadata.speed,
+          mana: enemy.metadata.mana,
+          m_atk: enemy.metadata.m_atk,
+          m_def: enemy.metadata.m_def,
+        },
+        currentMetadata: {
+          atk: enemy.metadata.atk,
+          def: enemy.metadata.def,
+          health: enemy.metadata.health,
+          speed: enemy.metadata.speed,
+          mana: enemy.metadata.mana,
+          m_atk: enemy.metadata.m_atk,
+          m_def: enemy.metadata.m_def,
         },
       });
     };
@@ -187,6 +200,7 @@ export default class Server {
         case EMessagePVERoom.EndTurn:
           console.log("END TURN");
           this.events.emit("notification", `END TURN ${message.turn}`);
+          this.events.emit("end-turn");
           break;
         case EMessagePVERoom.EndRound:
           console.log("END ROUND");
@@ -273,6 +287,10 @@ export default class Server {
   sendDoneAnimation() {
     if (!this.room) return;
     this.room.send(EMessagePVERoom.DoneAnimation, { x: 1 });
+  }
+
+  endTurn(cb: () => void, context?: any) {
+    this.events.on("end-turn", cb, context);
   }
   endRound(cb: () => void, context?: any) {
     this.events.on("end-round", cb, context);

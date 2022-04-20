@@ -12,7 +12,7 @@ export enum EMessagePVERoom {
   EndGame = "EndGame",
   Left = "Left",
   Error = "Error",
-  EndResult = "EndResult"
+  EndResult = "EndResult",
 }
 
 export enum EActionEntityTypePvERoom {
@@ -39,6 +39,7 @@ export type TPlanningInfoPVERoom = {
     id: string;
     type: EEntityTypePvERoom;
   }[];
+  target?: ETargetType;
   actionId?: string;
 };
 
@@ -48,4 +49,14 @@ export type TEntityEffect = {
   atk?: number;
   def?: number;
   mana?: number;
+  m_atk?: number;
+  m_def?: number;
 };
+
+export enum ETargetType {
+  ALLALLIES = "ALLALLIES",
+  ALLY = "ALLY",
+  ALLENEMIES = "ALLENEMIES",
+  ENEMY = "ENEMY",
+  SELF = "SELF",
+}
