@@ -468,11 +468,10 @@ export default class Game extends Phaser.Scene {
               });
             }
             this.setGuideline(
-              `$NOW PICK ONLY ONE ${
-                value.target === ETargetType.ALLALLIES ||
+              `$NOW PICK ONLY ONE ${value.target === ETargetType.ALLALLIES ||
                 value.target === ETargetType.ALLY
-                  ? "NEKO"
-                  : "ENEMY"
+                ? "NEKO"
+                : "ENEMY"
               }`
             );
             this.skillInfo.target = value.target;
@@ -516,7 +515,7 @@ export default class Game extends Phaser.Scene {
       this.add.text(
         x - 90,
         y - 40 * (idx + 1) - 70,
-        `${value.id.split("-")[0]}`,
+        `${value.name}`,
         {
           fontSize: "12px",
         }
@@ -696,14 +695,12 @@ export default class Game extends Phaser.Scene {
       );
       const name =
         action.type === EEntityTypePvERoom.NEKO
-          ? `${
-              this.aliveNekos.get(action.id)?.name ||
-              `DEAD ${this.initialNekos.get(action.id)?.name}`
-            }`
-          : `${
-              this.aliveEnemies.get(action.id)?.name ||
-              `DEAD ${this.initialEnemies.get(action.id)?.name}`
-            }`;
+          ? `${this.aliveNekos.get(action.id)?.name ||
+          `DEAD ${this.initialNekos.get(action.id)?.name}`
+          }`
+          : `${this.aliveEnemies.get(action.id)?.name ||
+          `DEAD ${this.initialEnemies.get(action.id)?.name}`
+          }`;
       if (entityQueue.text) {
         entityQueue.text.setActive(false).setVisible(false);
       }
@@ -741,14 +738,12 @@ export default class Game extends Phaser.Scene {
     this.skillInfo.targets = [];
     this.skillInfo.actionType = EActionEntityTypePvERoom.NONE;
     this.setCharacterInfo(
-      `${this.currCharacter.name} with atk: ${
-        this.currCharacter.currentMetadata
-          ? this.currCharacter.currentMetadata.atk
-          : this.currCharacter.atk
-      }, def: ${
-        this.currCharacter.currentMetadata
-          ? this.currCharacter.currentMetadata.def
-          : this.currCharacter.def
+      `${this.currCharacter.name} with atk: ${this.currCharacter.currentMetadata
+        ? this.currCharacter.currentMetadata.atk
+        : this.currCharacter.atk
+      }, def: ${this.currCharacter.currentMetadata
+        ? this.currCharacter.currentMetadata.def
+        : this.currCharacter.def
       }`
     );
   }
@@ -862,7 +857,7 @@ export default class Game extends Phaser.Scene {
         const diedEntity = this.turnQueues.get(effectNeko.id);
         diedEntity.object.fillColor = DIED_ENTITY;
         diedEntity.text.setText(`DEAD: ${effectNeko.name}`);
-        this.aliveNekos.delete(ne.id);
+        // this.aliveNekos.delete(ne.id);
         diedEnitties.push(effectNeko.id);
       }
     });
@@ -910,7 +905,7 @@ export default class Game extends Phaser.Scene {
         const diedEntity = this.turnQueues.get(effectEnemy.id);
         diedEntity.object.fillColor = DIED_ENTITY;
         diedEntity.text.setText(`DEAD: ${effectEnemy.name}`);
-        this.aliveEnemies.delete(ee.id);
+        // this.aliveEnemies.delete(ee.id);
         diedEnitties.push(effectEnemy.id);
       }
     });
@@ -986,7 +981,7 @@ export default class Game extends Phaser.Scene {
         const diedEntity = this.turnQueues.get(effectNeko.id);
         diedEntity.object.fillColor = DIED_ENTITY;
         diedEntity.text.setText(`DEAD: ${effectNeko.name}`);
-        this.aliveNekos.delete(ne.id);
+        // this.aliveNekos.delete(ne.id);
         diedEnitties.push(effectNeko.id);
       }
     });
@@ -1040,7 +1035,7 @@ export default class Game extends Phaser.Scene {
         const diedEntity = this.turnQueues.get(effectEnemy.id);
         diedEntity.object.fillColor = DIED_ENTITY;
         diedEntity.text.setText(`DEAD: ${effectEnemy.name}`);
-        this.aliveEnemies.delete(ee.id);
+        // this.aliveEnemies.delete(ee.id);
         diedEnitties.push(effectEnemy.id);
       }
     });
