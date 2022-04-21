@@ -8,6 +8,7 @@ import {
   AVAILABLE_CONSUMPTION_ITEMS,
   UNAVAILABLE_CONSUMPTION_ITEMS,
   DIED_ENTITY,
+  AVAILABLE_SKILL_ENEMY,
 } from "./../constants";
 import Phaser from "phaser";
 import Server from "../services/Server";
@@ -18,6 +19,7 @@ import {
   TEntityEffect,
   EActionEntityTypePvERoom,
   ETargetType,
+  TActionResponse,
 } from "../services/types";
 import CountdownController from "./CountdownController";
 import {
@@ -195,10 +197,6 @@ export default class Game extends Phaser.Scene {
               type: EEntityTypePvERoom.ENEMY,
             });
             const ne = this.aliveNekos.get(this.skillInfo.nekoId);
-            // if (this.skillInfo.actionType === EActionEntityTypePvERoom.SKILL) {
-            //   ne.mana -= this.skillMana;
-            //   ne.mana_text.setText(`Mana: ${ne.mana}`);
-            // }
             ne.skill_objects.forEach((sk) => {
               sk.setAngle(90);
               sk.disableInteractive();
@@ -250,6 +248,7 @@ export default class Game extends Phaser.Scene {
           `Mana: ${enemies[idx].metadata["mana"]}`,
           { fontSize: "14px" }
         );
+        this.addSkillEnemies(x, y, enemies[idx]);
         this.addEnemyEffect(x, y, enemies[idx]);
       }
       if (idx === 5) {
@@ -327,22 +326,6 @@ export default class Game extends Phaser.Scene {
       x += size;
     });
     this.addConsumptionItem();
-
-    // this.add.rectangle(1300, 150, 100, 100, 0x7b7aa6).setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
-    //     this.server?.startTurn();
-    // });
-    // this.add.text(1250, 150, 'Start Turn');
-
-    // this.actionButton = this.add.rectangle(1300, 650, 100, 100, 0x7b7aa6).setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
-    //     this.actionButton?.disableInteractive();
-    //     const ne = this.aliveNekos.get(this.skillInfo.nekoId);
-    //     ne.skills.forEach(sk => {
-    //         sk.setAngle(90);
-    //         sk.disableInteractive();
-    //     });
-    //     this.server?.sendSkillInformation(this.skillInfo);
-    // });
-    // this.add.text(1260, 650, 'Action');
 
     this.server?.onQueueChanged(this.addQueue, this);
     this.server?.onStartTurn(this.startTurn, this);
@@ -447,8 +430,8 @@ export default class Game extends Phaser.Scene {
         .rectangle(
           x - 55,
           y + 85 * (idx + 1) + 55,
-          80,
-          80,
+          50,
+          50,
           AVAILABLE_SKILL_BUTTON_COLOR
         )
         .setInteractive()
@@ -496,6 +479,36 @@ export default class Game extends Phaser.Scene {
     //     });
     //     this.add.text(x + 30, y + 85 * (idx + 1) + 55, `${value.name}`);
     // })
+  }
+  private addSkillEnemies(x: number, y: number, neko: any) {
+    const ee = this.aliveEnemies.get(neko.id);
+    neko.skills.forEach((value, idx) => {
+      let tmp = this.add.rectangle(
+        x - 55,
+        y - 40 * (idx + 1) - 55,
+        40,
+        40,
+        AVAILABLE_SKILL_BUTTON_COLOR
+      );
+      tmp.setVisible(false);
+      tmp.disableInteractive();
+      ee.skill_objects.push(tmp);
+      ee.skills.push(value);
+      this.add.text(
+        x - 90,
+        y - 40 * (idx + 1) - 55,
+        `${value.name}${value.id}`,
+        {
+          fontSize: "12px",
+        }
+      );
+      this.add.text(
+        x - 90,
+        y - 40 * (idx + 1) - 70,
+        `Mana:${value.metadata["mana"]}`,
+        { fontSize: "12px" }
+      );
+    });
   }
 
   private addNekoEffect(x: number, y: number, neko: any) {
@@ -677,6 +690,7 @@ export default class Game extends Phaser.Scene {
       if (action.type === EEntityTypePvERoom.NEKO) {
         if (idx === currIdx) {
           this.currCharacter = this.aliveNekos.get(action.id);
+          this.currCharacter.type = EEntityTypePvERoom.NEKO;
           this.skillInfo.nekoId = action.id;
         } else {
           this.aliveNekos.get(action.id)?.skill_objects.forEach((sk) => {
@@ -688,6 +702,7 @@ export default class Game extends Phaser.Scene {
       } else {
         if (idx === currIdx)
           this.currCharacter = this.aliveEnemies.get(action.id);
+        this.currCharacter.type = EEntityTypePvERoom.ENEMY;
       }
     });
     this.currCharacter.circle_object.fillColor = PROCESSING_QUEUE;
@@ -749,7 +764,7 @@ export default class Game extends Phaser.Scene {
     }
   }
 
-  private async updateResults(effect: any) {
+  private async updateResults(action: TActionResponse, effect: any) {
     this.setNotification("RESULTS AND ANIMATION");
     this.actionClock?.stop();
     this.error?.setVisible(false);
@@ -759,6 +774,16 @@ export default class Game extends Phaser.Scene {
       value.setInteractive();
     });
     const currentCharQueue = this.turnQueues.get(this.currCharacter.id);
+    //NOTE: set choosen action of emeny
+    if (this.currCharacter.type === EEntityTypePvERoom.ENEMY) {
+      this.currCharacter.skills.forEach((item, index) => {
+        if (item.id === action.actionId) {
+          this.currCharacter.skill_objects[index].fillColor =
+            AVAILABLE_SKILL_ENEMY;
+        }
+      });
+    }
+
     this.currCharacter.circle_object.fillColor = this.skillInfo.nekoId
       ? CIRCLE_OBJECT_NEKO_COLOR
       : CIRCLE_OBJECT_ENEMY_COLOR;
@@ -852,7 +877,6 @@ export default class Game extends Phaser.Scene {
   }
 
   private async updateEndResult(effect: any) {
-    console.log("effect: ", effect);
     this.setNotification("END RESULTS AND ANIMATION");
     this.actionClock?.stop();
     this.error?.setVisible(false);
@@ -910,12 +934,6 @@ export default class Game extends Phaser.Scene {
       effectNeko.def_text_effect.setText(`DEF: ${ne.def || 0}`);
       effectNeko.m_def_effect_text.setText(`M_DEF: ${ne.m_def || 0}`);
       this.isShowNekoEffect(effectNeko, true);
-      console.log(
-        `neko: ${effectNeko.name - effectNeko.id}: `,
-        effectNeko.metadata.health,
-        effectNeko.metadata.mana,
-        effectNeko.currentMetadata
-      );
 
       if (effectNeko.health <= 0) {
         effectNeko.circle_object.setVisible(false);
@@ -981,6 +999,12 @@ export default class Game extends Phaser.Scene {
   }
 
   private endTurn() {
+    // NOTE: set disable skill after each turn
+    if (this.currCharacter.type === EEntityTypePvERoom.ENEMY) {
+      this.currCharacter.skill_objects.forEach((item) => {
+        item.setVisible(false);
+      });
+    }
     this.aliveNekos.forEach((e) => {
       const ne = this.aliveNekos.get(e.id);
       this.isShowNekoEffect(e, false);

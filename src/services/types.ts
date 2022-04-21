@@ -53,6 +53,11 @@ export type TEntityEffect = {
   m_def?: number;
 };
 
+export type TActionResponse = {
+  actionId: string;
+  actionType: EActionEntityTypePvERoom;
+};
+
 export enum ETargetType {
   ALLALLIES = "ALLALLIES",
   ALLY = "ALLY",
