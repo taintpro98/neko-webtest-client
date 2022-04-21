@@ -600,26 +600,69 @@ export default class Game extends Phaser.Scene {
     e.mana_text_effect.setVisible(false);
   }
 
-  private isShowEnemyEffect(ne: any, visible: boolean) {
+  private isShowEnemyEffect(ne: any, visible: boolean, ee?: TEntityEffect) {
     const enemy = this.aliveEnemies.get(ne.id);
     enemy.effect_area.setVisible(visible);
-    enemy.health_text_effect.setVisible(visible);
-    enemy.atk_text_effect.setVisible(visible);
-    enemy.def_text_effect.setVisible(visible);
-    enemy.m_atk_text_effect.setVisible(visible);
-    enemy.m_def_effect_text.setVisible(visible);
-    enemy.mana_text_effect.setVisible(visible);
+    if (visible) {
+      if (ee?.health !== 0) {
+        enemy.health_text_effect.setVisible(visible);
+      }
+      if (ee?.atk !== 0) {
+        enemy.atk_text_effect.setVisible(visible);
+      }
+      if (ee?.def !== 0) {
+        enemy.atk_text_effect.setVisible(visible);
+      }
+      if (ee?.m_atk !== 0) {
+        enemy.m_atk_text_effect.setVisible(visible);
+      }
+      if (ee?.m_def !== 0) {
+        enemy.m_def_effect_text.setVisible(visible);
+      }
+      if (ee?.mana !== 0) {
+        enemy.mana_text_effect.setVisible(visible);
+      }
+    } else {
+      enemy.health_text_effect.setVisible(visible);
+      enemy.atk_text_effect.setVisible(visible);
+      enemy.def_text_effect.setVisible(visible);
+      enemy.m_atk_text_effect.setVisible(visible);
+      enemy.m_def_effect_text.setVisible(visible);
+      enemy.mana_text_effect.setVisible(visible);
+    }
   }
 
-  private isShowNekoEffect(ne: any, visible: boolean) {
+  private isShowNekoEffect(ne: any, visible: boolean, ee?: TEntityEffect) {
     const neko = this.aliveNekos.get(ne.id);
-    ne.effect_area.setVisible(visible);
-    ne.health_text_effect.setVisible(visible);
-    ne.atk_text_effect.setVisible(visible);
-    ne.def_text_effect.setVisible(visible);
-    ne.m_atk_text_effect.setVisible(visible);
-    ne.m_def_effect_text.setVisible(visible);
-    ne.mana_text_effect.setVisible(visible);
+    neko.effect_area.setVisible(visible);
+    if (visible) {
+      if (ee?.health !== 0) {
+        neko.health_text_effect.setVisible(visible);
+      }
+      if (ee?.atk !== 0) {
+        neko.atk_text_effect.setVisible(visible);
+      }
+      if (ee?.def !== 0) {
+        neko.atk_text_effect.setVisible(visible);
+      }
+      if (ee?.m_atk !== 0) {
+        neko.m_atk_text_effect.setVisible(visible);
+      }
+      if (ee?.m_def !== 0) {
+        neko.m_def_effect_text.setVisible(visible);
+      }
+      if (ee?.mana !== 0) {
+        neko.mana_text_effect.setVisible(visible);
+      }
+    } else {
+      ne.effect_area.setVisible(visible);
+      ne.health_text_effect.setVisible(visible);
+      ne.atk_text_effect.setVisible(visible);
+      ne.def_text_effect.setVisible(visible);
+      ne.m_atk_text_effect.setVisible(visible);
+      ne.m_def_effect_text.setVisible(visible);
+      ne.mana_text_effect.setVisible(visible);
+    }
   }
 
   private addQueue(queue: any[], currIdx: number) {
@@ -855,7 +898,7 @@ export default class Game extends Phaser.Scene {
       effectEnemy.m_atk_text_effect.setText(`M_ATK: ${ee.m_atk || 0}`);
       effectEnemy.def_text_effect.setText(`DEF: ${ee.def || 0}`);
       effectEnemy.m_def_effect_text.setText(`M_DEF: ${ee.m_def || 0}`);
-      this.isShowEnemyEffect(effectEnemy, true);
+      this.isShowEnemyEffect(effectEnemy, true, ee);
       if (effectEnemy.health <= 0) {
         effectEnemy.circle_object.setVisible(false);
         effectEnemy.star_object.setVisible(false);
@@ -930,7 +973,7 @@ export default class Game extends Phaser.Scene {
       effectNeko.m_atk_text_effect.setText(`M_ATK: ${ne.m_atk || 0}`);
       effectNeko.def_text_effect.setText(`DEF: ${ne.def || 0}`);
       effectNeko.m_def_effect_text.setText(`M_DEF: ${ne.m_def || 0}`);
-      this.isShowNekoEffect(effectNeko, true);
+      this.isShowNekoEffect(effectNeko, true, ne);
 
       if (effectNeko.health <= 0) {
         effectNeko.circle_object.setVisible(false);
@@ -976,7 +1019,7 @@ export default class Game extends Phaser.Scene {
       effectEnemy.m_atk_text_effect.setText(`M_ATK: ${ee.m_atk || 0}`);
       effectEnemy.def_text_effect.setText(`DEF: ${ee.def || 0}`);
       effectEnemy.m_def_effect_text.setText(`M_DEF: ${ee.m_def || 0}`);
-      this.isShowEnemyEffect(effectEnemy, true);
+      this.isShowEnemyEffect(effectEnemy, true, ee);
 
       if (effectEnemy.health <= 0) {
         effectEnemy.circle_object.setVisible(false);
