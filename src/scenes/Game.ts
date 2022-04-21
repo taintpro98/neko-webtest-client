@@ -744,9 +744,6 @@ export default class Game extends Phaser.Scene {
       [...this.aliveEnemies.values()].forEach((ee) => {
         ee.circle_object.setInteractive();
       });
-      // [...this.aliveNekos.values()].forEach((ee) => {
-      //   ee.circle_object.setInteractive();
-      // });
 
       this.currCharacter.skill_objects.forEach((sk, idx) => {
         sk.setInteractive();
@@ -886,9 +883,9 @@ export default class Game extends Phaser.Scene {
       value.setInteractive();
     });
     const currentCharQueue = this.turnQueues.get(this.currCharacter.id);
-    this.currCharacter.circle_object.fillColor = this.skillInfo.nekoId
-      ? CIRCLE_OBJECT_NEKO_COLOR
-      : CIRCLE_OBJECT_ENEMY_COLOR;
+    // this.currCharacter.circle_object.fillColor = this.skillInfo.nekoId
+    //   ? CIRCLE_OBJECT_NEKO_COLOR
+    //   : CIRCLE_OBJECT_ENEMY_COLOR;
     this.nDoneCharacter = (this.nDoneCharacter + 1) % 6;
     this.skillInfo.nekoId = "";
     let diedEnitties: any[] = [];
