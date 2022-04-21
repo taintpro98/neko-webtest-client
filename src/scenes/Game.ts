@@ -1059,19 +1059,18 @@ export default class Game extends Phaser.Scene {
       });
     }
     this.aliveNekos.forEach((e) => {
-      const ne = this.aliveNekos.get(e.id);
       this.isShowNekoEffect(e, false);
-      if (ne.metadata.mana < 5) {
-        ne.metadata.mana += 1;
-        ne.mana_text.setText(`Mana: ${Number(ne.metadata.mana).toFixed(1)}`);
+      if (e.metadata.mana < 5) {
+        e.metadata.mana += 1;
+        e.mana_text.setText(`Mana: ${Number(e.metadata.mana).toFixed(1)}`);
       }
     });
 
     this.aliveEnemies.forEach((e) => {
-      const ne = this.aliveEnemies.get(e.id);
       this.isShowEnemyEffect(e, false);
-      if (ne.metadata.mana < 5) {
-        ne.mana_text.setText(`Mana: ${Number(ne.metadata.mana).toFixed(1)}`);
+      if (e.metadata.mana < 5) {
+        e.metadata.mana += 1;
+        e.mana_text.setText(`Mana: ${Number(e.metadata.mana).toFixed(1)}`);
       }
     });
   }
