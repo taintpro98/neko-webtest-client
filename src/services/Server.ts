@@ -3,7 +3,7 @@ import { Client, Room } from "colyseus.js";
 import { Schema } from "@colyseus/schema";
 import Phaser from "phaser";
 import axiosInstance from "../configs/axiosInstance";
-import { EMessagePVERoom, TPlanningInfoPVERoom, TEntityEffect } from "./types";
+import { EMessagePVERoom, TPlanningInfoPVERoom, TEntityEffect, TActionResponse } from "./types";
 
 export default class Server {
   private client: Client;
@@ -190,7 +190,7 @@ export default class Server {
           console.log("RESULTS");
           this.events.emit("notification", "RESULTS");
 
-          this.events.emit("update-results", message.effect);
+          this.events.emit("update-results", message.action, message.effect);
           break;
         case EMessagePVERoom.EndResult:
           console.log("END RESULTS");
@@ -276,7 +276,7 @@ export default class Server {
     this.room.send(EMessagePVERoom.Action, skillInfo);
   }
 
-  updateResults(cb: (effect: TEntityEffect) => void, context?: any) {
+  updateResults(cb: (action: TActionResponse, effect: TEntityEffect) => void, context?: any) {
     this.events.on("update-results", cb, context);
   }
 
