@@ -56,7 +56,9 @@ export default class Game extends Phaser.Scene {
   private nDoneCharacter: number = 0;
   private currCharacter: any;
   private buttonStartRound;
-  private skillDescription;
+  private turnEffectSkillInfo?: Phaser.GameObjects.Text;
+  private numTurnSkillInfo?: Phaser.GameObjects.Text;
+  private skillInfoActions?: Phaser.GameObjects.Text[];
 
   constructor() {
     super("game");
@@ -92,37 +94,34 @@ export default class Game extends Phaser.Scene {
   private drawInfoSkill = (skill) => {
     const { width, height } = this.scale;
     const x = 12;
-    const y = height * 0.8;
-    this.skillDescription.turnEffectText = this.add.text(
-      x,
-      y - 50,
-      `Turn Effect: ${skill.turn_effect}`,
-      {
-        fontSize: "14px",
-        color: "white",
-      }
-    );
-    this.skillDescription.numTurns = this.add.text(
-      x,
-      y - 35,
-      `numTurns: ${skill.metadata.numTurns}`,
-      {
-        fontSize: "14px",
-        color: "white",
-      }
-    );
-    if (skill && skill.actions.length) {
-      skill.actions.forEach((item, index) => {
-        this.add.text(
-          x,
-          y - 35 + (index + 1) * 15,
-          `action: ${item.action.target} - ${item.action.description}`,
-          {
-            fontSize: "14px",
-            color: "white",
-          }
-        );
-      });
+    const y = height * 0.4;
+    console.log("skill: ", skill["turn_effect"]);
+    console.log("action: ", skill["metadata"]["actions"]);
+    if (!this.turnEffectSkillInfo) {
+      this.turnEffectSkillInfo = this.add.text(
+        x,
+        y - 50,
+        `Turn Effect: ${skill["turn_effect"]}`,
+        {
+          fontSize: "14px",
+          color: "red",
+        }
+      );
+    } else {
+      this.turnEffectSkillInfo.setText(`Turn Effect: ${skill["turn_effect"]}`);
+    }
+    if (!this.numTurnSkillInfo) {
+      this.numTurnSkillInfo = this.add.text(
+        x,
+        y - 35,
+        `numTurns: ${skill.metadata["numTurns"]}`,
+        {
+          fontSize: "14px",
+          color: "white",
+        }
+      );
+    } else {
+      this.numTurnSkillInfo.setText(`numTurns: ${skill.metadata["numTurns"]}`);
     }
   };
 
@@ -448,7 +447,7 @@ export default class Game extends Phaser.Scene {
             this.skillInfo.actionId = value.id;
           });
         tmp.setVisible(false);
-        tmp.disableInteractive();
+        // tmp.disableInteractive();
         this.add.text(x - 90, y + (currIdx + 1) * 150 - 20, `${value.name}`);
         this.add.text(
           x - 90,
@@ -464,6 +463,7 @@ export default class Game extends Phaser.Scene {
   private addSkillsnItems(x: number, y: number, neko: any) {
     const ne = this.aliveNekos.get(neko.id);
     neko.skills.forEach((value, idx) => {
+      console.log("this: value", value);
       let tmp = this.add
         .rectangle(
           x - 55,
@@ -473,6 +473,7 @@ export default class Game extends Phaser.Scene {
           AVAILABLE_SKILL_BUTTON_COLOR
         )
         .setInteractive()
+
         .on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
           this.drawInfoSkill(value);
           if (ne.mana < value.metadata["mana"]) {
@@ -546,14 +547,13 @@ export default class Game extends Phaser.Scene {
           y - 40 * (idx + 1) - 70,
           70,
           30,
-          AVAILABLE_SKILL_BUTTON_COLOR
+          UNAVAILABLE_CONSUMPTION_ITEMS
         )
         .setInteractive()
         .on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
           this.drawInfoSkill(value);
         });
-      tmp.setVisible(false);
-      tmp.disableInteractive();
+      tmp.setVisible(true);
       ee.skill_objects.push(tmp);
       ee.skills.push(value);
       this.add.text(x - 90, y - 40 * (idx + 1) - 70, `${value.name}`, {

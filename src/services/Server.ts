@@ -21,7 +21,7 @@ export default class Server {
   private enemies: any[] = [];
 
   constructor() {
-    this.client = new Client("ws://13.212.107.173:4000");
+    this.client = new Client("ws://localhost:4000");
     this.events = new Phaser.Events.EventEmitter();
   }
 
@@ -114,6 +114,7 @@ export default class Server {
           currentMetadata: item.metadata,
         });
       });
+     
     }
     this.room.state.consumptionItems.onAdd = (item, key) => {
       this.roomConsumptions.push({
@@ -134,7 +135,6 @@ export default class Server {
           console.log("READY");
           this.events.emit("notification", "READY");
 
-          console.log("nekos: ", this.roomNekos);
           this.events.emit(
             "init-room",
             this.roomNekos,
