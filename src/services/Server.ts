@@ -58,76 +58,75 @@ export default class Server {
       { ...createData },
       { headers: { Authorization: `Bearer ${access_token}` } }
     );
+    const pveRoomStateData = await axiosInstance.get(
+      `/v1/pve/rooms/${result.data.data.id}`,
+      { headers: { Authorization: `Bearer ${access_token}` } }
+    );
+    const roomState = pveRoomStateData.data.data;
+    roomState.nekos.forEach((item) => {
+      let skills: any[] = [];
+      if (item.skills.length !== 0) {
+        skills = item.skills.map((item) => ({
+          id: item.id,
+          name: item.name,
+          turn_effect: item.turn_effect,
+          metadata: {
+            numTurns: item.metadata.numTurns,
+            mana: item.metadata.mana,
+            actions: item.metadata.actions,
+          },
+        }));
+      }
+      this.roomNekos.push({
+        id: item.id,
+        name: item.name,
+        skills: skills,
+        metadata: item.metadata,
+        currentMetadata: item.metadata,
+      });
+    });
+
+    roomState.enemies.forEach((item) => {
+      let skills: any[] = [];
+      if (item.skills.length !== 0) {
+        skills = item.skills.map((item) => ({
+          id: item.id,
+          name: item.name,
+          turn_effect: item.turn_effect,
+          metadata: {
+            numTurns: item.metadata.numTurns,
+            mana: item.metadata.mana,
+            actions: item.metadata.actions,
+          },
+        }));
+      }
+      this.enemies.push({
+        id: item.id,
+        name: item.name,
+        skills: skills,
+        metadata: item.metadata,
+        currentMetadata: item.metadata,
+      });
+    });
 
     this.room = await this.client.joinOrCreate("pve_room", {
       roomId: result.data.data.id,
       access_token,
     });
     if (this.room) {
-      const pveRoomStateData = await axiosInstance.get(
-        `/v1/pve/rooms/${result.data.data.id}`,
-        { headers: { Authorization: `Bearer ${access_token}` } }
-      );
-      const roomState = pveRoomStateData.data.data;
-      roomState.nekos.forEach((item) => {
-        let skills: any[] = [];
-        if (item.skills.length !== 0) {
-          skills = item.skills.map((item) => ({
-            id: item.id,
-            name: item.name,
-            turn_effect: item.turn_effect,
-            metadata: {
-              numTurns: item.metadata.numTurns,
-              mana: item.metadata.mana,
-              actions: item.metadata.actions,
-            },
-          }));
-        }
-        this.roomNekos.push({
-          id: item.id,
+      this.room.state.consumptionItems.onAdd = (item, key) => {
+        this.roomConsumptions.push({
+          id: key,
           name: item.name,
-          skills: skills,
-          metadata: item.metadata,
-          currentMetadata: item.metadata,
+          consumption_item_type_id: item.consumption_item_type_id,
+          metadata: {
+            background: item.metadata.background,
+            damage: item.metadata.damage,
+            functionName: item.metadata.functionName,
+          },
         });
-      });
-
-      roomState.enemies.forEach((item) => {
-        let skills: any[] = [];
-        if (item.skills.length !== 0) {
-          skills = item.skills.map((item) => ({
-            id: item.id,
-            name: item.name,
-            turn_effect: item.turn_effect,
-            metadata: {
-              numTurns: item.metadata.numTurns,
-              mana: item.metadata.mana,
-              actions: item.metadata.actions,
-            },
-          }));
-        }
-        this.enemies.push({
-          id: item.id,
-          name: item.name,
-          skills: skills,
-          metadata: item.metadata,
-          currentMetadata: item.metadata,
-        });
-      });
-     
+      };
     }
-    this.room.state.consumptionItems.onAdd = (item, key) => {
-      this.roomConsumptions.push({
-        id: key,
-        name: item.name,
-        consumption_item_type_id: item.consumption_item_type_id,
-        metadata: {
-          background: item.metadata.background,
-          damage: item.metadata.damage,
-          functionName: item.metadata.functionName,
-        },
-      });
-    };
 
     this.room.onMessage("*", (type, message) => {
       switch (type) {
