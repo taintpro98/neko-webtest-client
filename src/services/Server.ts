@@ -39,7 +39,6 @@ export default class Server {
           "fb13956f-40af-48cb-bf1f-9c7238e25b46",
           "15449e11-0e3e-4e25-bbc4-55abff048f0e",
         ],
-
       },
       {
         id: "15c6b4ae-bcd5-4886-bf1e-ec98790e96f3",
@@ -47,7 +46,6 @@ export default class Server {
           "c991124f-b4b3-44e9-8bef-03b5fadce885",
           "cec12728-c231-43a0-a6be-a936d40bdab3",
         ],
-
       },
       {
         id: "fa681035-cddc-44be-8182-bd25057c5534",
@@ -76,7 +74,7 @@ export default class Server {
       `/v1/pve/rooms/${result.data.data.id}`,
       { headers: { Authorization: `Bearer ${access_token}` } }
     );
-   
+
     const roomState = pveRoomStateData.data.data;
     console.log(roomState);
     roomState.nekos.forEach((item) => {
@@ -86,6 +84,7 @@ export default class Server {
           id: item.id,
           name: item.name,
           turn_effect: item.turn_effect,
+          target: item.target,
           metadata: {
             numTurns: item.metadata.numTurns,
             mana: item.metadata.mana,
@@ -109,6 +108,7 @@ export default class Server {
           id: item.id,
           name: item.name,
           turn_effect: item.turn_effect,
+          target: item.target,
           metadata: {
             numTurns: item.metadata.numTurns,
             mana: item.metadata.mana,
@@ -125,7 +125,7 @@ export default class Server {
       });
     });
 
-    roomState.consumption_items.forEach((item,index) => {
+    roomState.consumption_items.forEach((item, index) => {
       this.roomConsumptions.push({
         id: item.id,
         name: item.name,
@@ -136,7 +136,7 @@ export default class Server {
           functionName: item.metadata.functionName,
         },
       });
-    })
+    });
 
     this.room = await this.client.joinOrCreate("pve_room", {
       roomId: result.data.data.id,

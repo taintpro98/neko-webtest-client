@@ -299,7 +299,7 @@ export default class Game extends Phaser.Scene {
             const ne = this.aliveNekos.get(this.skillInfo.nekoId);
             ne.skill_objects.forEach((sk) => {
               sk.setAngle(90);
-              sk.disableInteractive();
+              // sk.disableInteractive();
             });
             this.server?.sendSkillInformation(this.skillInfo);
             this.setNotification("SENDING YOUR ACTION...");
@@ -539,52 +539,54 @@ export default class Game extends Phaser.Scene {
 
         .on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
           this.drawInfoSkill(value);
-          if (ne.mana < value.metadata["mana"]) {
-            this.setGuideline(
-              "YOUR NEKO DOESN'T HAVE ENOUGH MANA TO USE THIS SKILL"
-            );
-          } else {
-            ne.skill_objects.forEach((sk) => {
-              sk.setAngle(90);
-            });
-            tmp.setAngle(45);
-            this.setCharacterInfo(
-              `${value.name} turn_effect: ${value.turn_effect} target: ${value.target}`
-            );
-            const isAlly =
-              value.target === ETargetType.ALLALLIES ||
-              value.target === ETargetType.ALLY;
-            if (isAlly) {
-              [...this.aliveNekos.values()].forEach((ee) => {
-                ee.circle_object.setInteractive();
-              });
-              [...this.aliveEnemies.values()].forEach((ee) => {
-                ee.circle_object.disableInteractive();
-              });
+          if (this.currCharacter.id === neko.id) {
+            if (ne.mana < value.metadata["mana"]) {
+              this.setGuideline(
+                "YOUR NEKO DOESN'T HAVE ENOUGH MANA TO USE THIS SKILL"
+              );
             } else {
-              [...this.aliveNekos.values()].forEach((ee) => {
-                ee.circle_object.disableInteractive();
+              ne.skill_objects.forEach((sk) => {
+                sk.setAngle(90);
               });
-              [...this.aliveEnemies.values()].forEach((ee) => {
-                ee.circle_object.setInteractive();
-              });
-            }
-            this.setGuideline(
-              `$NOW PICK ONLY ONE ${
+              tmp.setAngle(45);
+              this.setCharacterInfo(
+                `${value.name} turn_effect: ${value.turn_effect} target: ${value.target}`
+              );
+              const isAlly =
                 value.target === ETargetType.ALLALLIES ||
-                value.target === ETargetType.ALLY
-                  ? "NEKO"
-                  : "ENEMY"
-              }`
-            );
-            this.skillInfo.target = value.target;
-            this.skillInfo.actionType = EActionEntityTypePvERoom.SKILL;
+                value.target === ETargetType.ALLY;
+              if (isAlly) {
+                [...this.aliveNekos.values()].forEach((ee) => {
+                  ee.circle_object.setInteractive();
+                });
+                [...this.aliveEnemies.values()].forEach((ee) => {
+                  ee.circle_object.disableInteractive();
+                });
+              } else {
+                [...this.aliveNekos.values()].forEach((ee) => {
+                  ee.circle_object.disableInteractive();
+                });
+                [...this.aliveEnemies.values()].forEach((ee) => {
+                  ee.circle_object.setInteractive();
+                });
+              }
+              this.setGuideline(
+                `$NOW PICK ONLY ONE ${
+                  value.target === ETargetType.ALLALLIES ||
+                  value.target === ETargetType.ALLY
+                    ? "NEKO"
+                    : "ENEMY"
+                }`
+              );
+              this.skillInfo.target = value.target;
+              this.skillInfo.actionType = EActionEntityTypePvERoom.SKILL;
 
-            this.skillInfo.actionId = value.id;
+              this.skillInfo.actionId = value.id;
+            }
           }
         });
-      tmp.setVisible(false);
-      tmp.disableInteractive();
+      tmp.setVisible(true);
+      // tmp.disableInteractive();
       ne.skill_objects.push(tmp);
       ne.skills.push(value);
       this.add.text(x - 90, y + 75 * (idx + 1) + 55, `${value.name}`);
@@ -820,8 +822,8 @@ export default class Game extends Phaser.Scene {
           this.skillInfo.nekoId = action.id;
         } else {
           this.aliveNekos.get(action.id)?.skill_objects.forEach((sk) => {
-            sk.disableInteractive();
-            sk.setVisible(false);
+            // sk.disableInteractive();
+            // sk.setVisible(false);
             sk.setAngle(90);
           });
         }
