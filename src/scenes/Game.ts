@@ -56,6 +56,9 @@ export default class Game extends Phaser.Scene {
   private nDoneCharacter: number = 0;
   private currCharacter: any;
   private buttonStartRound;
+  private turnEffectSkillInfo?: Phaser.GameObjects.Text;
+  private numTurnSkillInfo?: Phaser.GameObjects.Text;
+  private skillInfoActions?: Phaser.GameObjects.Text[];
 
   constructor() {
     super("game");
@@ -88,6 +91,39 @@ export default class Game extends Phaser.Scene {
       "YOU DIDN'T PLAN ANYTHING ! SO YOUR NEKO AUTOMATICALLY FIGHT"
     );
   }
+  private drawInfoSkill = (skill) => {
+    const { width, height } = this.scale;
+    const x = 12;
+    const y = height * 0.4;
+    console.log("skill: ", skill["turn_effect"]);
+    console.log("action: ", skill["metadata"]["actions"]);
+    if (!this.turnEffectSkillInfo) {
+      this.turnEffectSkillInfo = this.add.text(
+        x,
+        y - 50,
+        `Turn Effect: ${skill["turn_effect"]}`,
+        {
+          fontSize: "14px",
+          color: "red",
+        }
+      );
+    } else {
+      this.turnEffectSkillInfo.setText(`Turn Effect: ${skill["turn_effect"]}`);
+    }
+    if (!this.numTurnSkillInfo) {
+      this.numTurnSkillInfo = this.add.text(
+        x,
+        y - 35,
+        `numTurns: ${skill.metadata["numTurns"]}`,
+        {
+          fontSize: "14px",
+          color: "white",
+        }
+      );
+    } else {
+      this.numTurnSkillInfo.setText(`numTurns: ${skill.metadata["numTurns"]}`);
+    }
+  };
 
   private createMap(roomNekos: any[], enemies: any[], consumptionItems: any[]) {
     this.add.renderTexture;
@@ -175,7 +211,7 @@ export default class Game extends Phaser.Scene {
     const size = 196;
 
     let x = width * 0.5 - size;
-    let y = height * 0.2 - 196;
+    let y = height * 0.2 - size;
 
     map.forEach((cellState, idx) => {
       if (idx > 0 && idx % 3 === 0) {
@@ -411,7 +447,7 @@ export default class Game extends Phaser.Scene {
             this.skillInfo.actionId = value.id;
           });
         tmp.setVisible(false);
-        tmp.disableInteractive();
+        // tmp.disableInteractive();
         this.add.text(x - 90, y + (currIdx + 1) * 150 - 20, `${value.name}`);
         this.add.text(
           x - 90,
@@ -427,6 +463,7 @@ export default class Game extends Phaser.Scene {
   private addSkillsnItems(x: number, y: number, neko: any) {
     const ne = this.aliveNekos.get(neko.id);
     neko.skills.forEach((value, idx) => {
+      console.log("this: value", value);
       let tmp = this.add
         .rectangle(
           x - 55,
@@ -436,7 +473,9 @@ export default class Game extends Phaser.Scene {
           AVAILABLE_SKILL_BUTTON_COLOR
         )
         .setInteractive()
+
         .on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
+          this.drawInfoSkill(value);
           if (ne.mana < value.metadata["mana"]) {
             this.setGuideline(
               "YOUR NEKO DOESN'T HAVE ENOUGH MANA TO USE THIS SKILL"
@@ -468,10 +507,11 @@ export default class Game extends Phaser.Scene {
               });
             }
             this.setGuideline(
-              `$NOW PICK ONLY ONE ${value.target === ETargetType.ALLALLIES ||
+              `$NOW PICK ONLY ONE ${
+                value.target === ETargetType.ALLALLIES ||
                 value.target === ETargetType.ALLY
-                ? "NEKO"
-                : "ENEMY"
+                  ? "NEKO"
+                  : "ENEMY"
               }`
             );
             this.skillInfo.target = value.target;
@@ -498,28 +538,27 @@ export default class Game extends Phaser.Scene {
     //     this.add.text(x + 30, y + 85 * (idx + 1) + 55, `${value.name}`);
     // })
   }
-  private addSkillEnemies(x: number, y: number, neko: any) {
-    const ee = this.aliveEnemies.get(neko.id);
-    neko.skills.forEach((value, idx) => {
-      let tmp = this.add.rectangle(
-        x - 55,
-        y - 40 * (idx + 1) - 70,
-        70,
-        30,
-        AVAILABLE_SKILL_BUTTON_COLOR
-      );
-      tmp.setVisible(false);
-      tmp.disableInteractive();
+  private addSkillEnemies(x: number, y: number, enemy: any) {
+    const ee = this.aliveEnemies.get(enemy.id);
+    enemy.skills.forEach((value, idx) => {
+      let tmp = this.add
+        .rectangle(
+          x - 55,
+          y - 40 * (idx + 1) - 70,
+          70,
+          30,
+          UNAVAILABLE_CONSUMPTION_ITEMS
+        )
+        .setInteractive()
+        .on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
+          this.drawInfoSkill(value);
+        });
+      tmp.setVisible(true);
       ee.skill_objects.push(tmp);
       ee.skills.push(value);
-      this.add.text(
-        x - 90,
-        y - 40 * (idx + 1) - 70,
-        `${value.name}`,
-        {
-          fontSize: "12px",
-        }
-      );
+      this.add.text(x - 90, y - 40 * (idx + 1) - 70, `${value.name}`, {
+        fontSize: "12px",
+      });
       this.add.text(
         x - 90,
         y - 40 * (idx + 1) - 85,
@@ -695,12 +734,14 @@ export default class Game extends Phaser.Scene {
       );
       const name =
         action.type === EEntityTypePvERoom.NEKO
-          ? `${this.aliveNekos.get(action.id)?.name ||
-          `DEAD ${this.initialNekos.get(action.id)?.name}`
-          }`
-          : `${this.aliveEnemies.get(action.id)?.name ||
-          `DEAD ${this.initialEnemies.get(action.id)?.name}`
-          }`;
+          ? `${
+              this.aliveNekos.get(action.id)?.name ||
+              `DEAD ${this.initialNekos.get(action.id)?.name}`
+            }`
+          : `${
+              this.aliveEnemies.get(action.id)?.name ||
+              `DEAD ${this.initialEnemies.get(action.id)?.name}`
+            }`;
       if (entityQueue.text) {
         entityQueue.text.setActive(false).setVisible(false);
       }
@@ -738,12 +779,14 @@ export default class Game extends Phaser.Scene {
     this.skillInfo.targets = [];
     this.skillInfo.actionType = EActionEntityTypePvERoom.NONE;
     this.setCharacterInfo(
-      `${this.currCharacter.name} with atk: ${this.currCharacter.currentMetadata
-        ? this.currCharacter.currentMetadata.atk
-        : this.currCharacter.atk
-      }, def: ${this.currCharacter.currentMetadata
-        ? this.currCharacter.currentMetadata.def
-        : this.currCharacter.def
+      `${this.currCharacter.name} with atk: ${
+        this.currCharacter.currentMetadata
+          ? this.currCharacter.currentMetadata.atk
+          : this.currCharacter.atk
+      }, def: ${
+        this.currCharacter.currentMetadata
+          ? this.currCharacter.currentMetadata.def
+          : this.currCharacter.def
       }`
     );
   }

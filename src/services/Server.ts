@@ -3,7 +3,12 @@ import { Client, Room } from "colyseus.js";
 import { Schema } from "@colyseus/schema";
 import Phaser from "phaser";
 import axiosInstance from "../configs/axiosInstance";
-import { EMessagePVERoom, TPlanningInfoPVERoom, TEntityEffect, TActionResponse } from "./types";
+import {
+  EMessagePVERoom,
+  TPlanningInfoPVERoom,
+  TEntityEffect,
+  TActionResponse,
+} from "./types";
 
 export default class Server {
   private client: Client;
@@ -72,90 +77,59 @@ export default class Server {
       roomId: result.data.data.id,
       access_token,
     });
-
-    // update enemy, neko and consumption_items follow server
-    this.room.state.nekos.onAdd = (neko, key) => {
-      let skills: any[] = [];
-      neko.skills.forEach((value, key) => {
-        skills.push({
-          id: value.id,
-          name: value.name,
-          turn_effect: value.turn_effect,
-          target: value.target,
-          metadata: {
-            numTurns: value.metadata.numTurns,
-            mana: value.metadata.mana,
-            // actions: value.metadata.actions,
-          },
-        });
-      });
-      this.roomNekos.push({
-        id: neko.id,
-        name: neko.name,
-        skills: skills,
-        metadata: {
-          atk: neko.metadata.atk,
-          def: neko.metadata.def,
-          health: neko.metadata.health,
-          speed: neko.metadata.speed,
-          mana: neko.metadata.mana,
-          m_atk: neko.metadata.m_atk,
-          m_def: neko.metadata.m_def,
-        },
-        currentMetadata: {
-          atk: neko.metadata.atk,
-          def: neko.metadata.def,
-          health: neko.metadata.health,
-          speed: neko.metadata.speed,
-          mana: neko.metadata.mana,
-          m_atk: neko.metadata.m_atk,
-          m_def: neko.metadata.m_def,
-        },
-      });
-    };
-
-    this.room.state.enemies.onAdd = (enemy, key) => {
-      let skills: any[] = [];
-      enemy.skills.forEach((value, key) => {
-        skills.push({
-          id: value.id,
-          name: value.name,
-          turn_effect: value.turn_effect,
-          target: value.target,
-          metadata: {
-            numTurns: value.metadata.numTurns,
-            mana: value.metadata.mana,
-            // actions: value.metadata.actions,
-          },
+    if (this.room) {
+      const pveRoomStateData = await axiosInstance.get(
+        `/v1/pve/rooms/${result.data.data.id}`,
+        { headers: { Authorization: `Bearer ${access_token}` } }
+      );
+      const roomState = pveRoomStateData.data.data;
+      roomState.nekos.forEach((item) => {
+        let skills: any[] = [];
+        if (item.skills.length !== 0) {
+          skills = item.skills.map((item) => ({
+            id: item.id,
+            name: item.name,
+            turn_effect: item.turn_effect,
+            metadata: {
+              numTurns: item.metadata.numTurns,
+              mana: item.metadata.mana,
+              actions: item.metadata.actions,
+            },
+          }));
+        }
+        this.roomNekos.push({
+          id: item.id,
+          name: item.name,
+          skills: skills,
+          metadata: item.metadata,
+          currentMetadata: item.metadata,
         });
       });
 
-      this.enemies.push({
-        id: enemy.id,
-        name: enemy.name,
-        skills: skills,
-        strategy: enemy.strategy,
-        metadata: {
-          atk: enemy.metadata.atk,
-          def: enemy.metadata.def,
-          health: enemy.metadata.health,
-          speed: enemy.metadata.speed,
-          mana: enemy.metadata.mana,
-          m_atk: enemy.metadata.m_atk,
-          m_def: enemy.metadata.m_def,
-        },
-        currentMetadata: {
-          atk: enemy.metadata.atk,
-          def: enemy.metadata.def,
-          health: enemy.metadata.health,
-          speed: enemy.metadata.speed,
-          mana: enemy.metadata.mana,
-          m_atk: enemy.metadata.m_atk,
-          m_def: enemy.metadata.m_def,
-        },
+      roomState.enemies.forEach((item) => {
+        let skills: any[] = [];
+        if (item.skills.length !== 0) {
+          skills = item.skills.map((item) => ({
+            id: item.id,
+            name: item.name,
+            turn_effect: item.turn_effect,
+            metadata: {
+              numTurns: item.metadata.numTurns,
+              mana: item.metadata.mana,
+              actions: item.metadata.actions,
+            },
+          }));
+        }
+        this.enemies.push({
+          id: item.id,
+          name: item.name,
+          skills: skills,
+          metadata: item.metadata,
+          currentMetadata: item.metadata,
+        });
       });
-    };
 
+    }
     this.room.state.consumptionItems.onAdd = (item, key) => {
       this.roomConsumptions.push({
         id: key,
@@ -175,7 +149,6 @@ export default class Server {
           console.log("READY");
           this.events.emit("notification", "READY");
 
-          console.log("nekos: ", this.roomNekos)
           this.events.emit(
             "init-room",
             this.roomNekos,
@@ -238,27 +211,6 @@ export default class Server {
           break;
       }
     });
-
-    // this.room.state.onChange = (changes) => {
-    //     changes.forEach(change => {
-    //         const { field, value } = change;
-    //         switch(field){
-    //             case 'nekos':
-    //                 console.log("value", [...value.values()]);
-    //                 this.roomNekos = [...value.values()]
-    //                 break;
-    //             case 'enemies':
-    //                 console.log("enemies");
-    //                 this.enemies = [...value.values()];
-    //                 break;
-    //         }
-    //     })
-    // }
-
-    // this.room.onStateChange((state) => {
-    //     this.events.emit('queue-changed', state.queue);
-    //     this.events.emit('blood-changed', state, this.room?.sessionId);
-    // });
   }
 
   initRoom(
@@ -292,13 +244,14 @@ export default class Server {
     this.room.send(EMessagePVERoom.Action, skillInfo);
   }
 
-  updateResults(cb: (action: TActionResponse, effect: TEntityEffect) => void, context?: any) {
-    console.log("🚀 ~ file: Server.ts ~ line 296 ~ Server ~ updateResults ~ effect", effect)
+  updateResults(
+    cb: (action: TActionResponse, effect: TEntityEffect) => void,
+    context?: any
+  ) {
     this.events.on("update-results", cb, context);
   }
 
   updateEndResults(cb: (effect: TEntityEffect) => void, context?: any) {
-    console.log("🚀 ~ file: Server.ts ~ line 300 ~ Server ~ updateEndResults ~ effect", effect)
     this.events.on("update-endresults", cb, context);
   }
 
