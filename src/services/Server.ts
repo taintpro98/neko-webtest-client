@@ -33,8 +33,22 @@ export default class Server {
     });
     const access_token = loginResponse.data.data.access_token;
     const nekos = [
-      { id: "2a92913b-98c1-46ff-8427-aa3bfd08d75f" },
-      { id: "15c6b4ae-bcd5-4886-bf1e-ec98790e96f3" },
+      {
+        id: "2a92913b-98c1-46ff-8427-aa3bfd08d75f",
+        skill_ids: [
+          "fb13956f-40af-48cb-bf1f-9c7238e25b46",
+          "15449e11-0e3e-4e25-bbc4-55abff048f0e",
+        ],
+
+      },
+      {
+        id: "15c6b4ae-bcd5-4886-bf1e-ec98790e96f3",
+        skill_ids: [
+          "c991124f-b4b3-44e9-8bef-03b5fadce885",
+          "cec12728-c231-43a0-a6be-a936d40bdab3",
+        ],
+
+      },
       {
         id: "fa681035-cddc-44be-8182-bd25057c5534",
         skill_ids: [
