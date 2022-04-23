@@ -62,7 +62,9 @@ export default class Server {
       `/v1/pve/rooms/${result.data.data.id}`,
       { headers: { Authorization: `Bearer ${access_token}` } }
     );
+   
     const roomState = pveRoomStateData.data.data;
+    console.log(roomState);
     roomState.nekos.forEach((item) => {
       let skills: any[] = [];
       if (item.skills.length !== 0) {
@@ -109,24 +111,23 @@ export default class Server {
       });
     });
 
+    roomState.consumption_items.forEach((item,index) => {
+      this.roomConsumptions.push({
+        id: item.id,
+        name: item.name,
+        consumption_item_type_id: item.consumption_item_type_id,
+        metadata: {
+          background: item.metadata.background,
+          damage: item.metadata.damage,
+          functionName: item.metadata.functionName,
+        },
+      });
+    })
+
     this.room = await this.client.joinOrCreate("pve_room", {
       roomId: result.data.data.id,
       access_token,
     });
-    if (this.room) {
-      this.room.state.consumptionItems.onAdd = (item, key) => {
-        this.roomConsumptions.push({
-          id: key,
-          name: item.name,
-          consumption_item_type_id: item.consumption_item_type_id,
-          metadata: {
-            background: item.metadata.background,
-            damage: item.metadata.damage,
-            functionName: item.metadata.functionName,
-          },
-        });
-      };
-    }
 
     this.room.onMessage("*", (type, message) => {
       switch (type) {
