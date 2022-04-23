@@ -58,6 +58,9 @@ export default class Game extends Phaser.Scene {
   private buttonStartRound;
   private turnEffectSkillInfo?: Phaser.GameObjects.Text;
   private numTurnSkillInfo?: Phaser.GameObjects.Text;
+  private manaSkillInfo?: Phaser.GameObjects.Text;
+  private nameSkillInfo?: Phaser.GameObjects.Text;
+  private idSkillInfo?: Phaser.GameObjects.Text;
   private skillInfoActions?: Phaser.GameObjects.Text[];
 
   constructor() {
@@ -95,8 +98,38 @@ export default class Game extends Phaser.Scene {
     const { width, height } = this.scale;
     const x = 12;
     const y = height * 0.4;
-    console.log("skill: ", skill["turn_effect"]);
-    console.log("action: ", skill["metadata"]["actions"]);
+
+    if (!this.nameSkillInfo) {
+      this.nameSkillInfo = this.add.text(x, y - 110, `Name: ${skill["name"]}`, {
+        fontSize: "14px",
+        color: "white",
+      });
+    } else {
+      this.nameSkillInfo.setText(`Name: ${skill["name"]}`);
+    }
+
+    if (!this.idSkillInfo) {
+      this.idSkillInfo = this.add.text(x, y - 90, `Id: ${skill["id"]}`, {
+        fontSize: "14px",
+        color: "white",
+      });
+    } else {
+      this.idSkillInfo.setText(`Id: ${skill["id"]}`);
+    }
+
+    if (!this.manaSkillInfo) {
+      this.manaSkillInfo = this.add.text(
+        x,
+        y - 70,
+        `mana: ${skill["metadata"]["mana"] || 0}`,
+        {
+          fontSize: "14px",
+          color: "white",
+        }
+      );
+    } else {
+      this.manaSkillInfo.setText(`mana: ${skill["metadata"]["mana"] || 0}`);
+    }
     if (!this.turnEffectSkillInfo) {
       this.turnEffectSkillInfo = this.add.text(
         x,
@@ -114,7 +147,7 @@ export default class Game extends Phaser.Scene {
       this.numTurnSkillInfo = this.add.text(
         x,
         y - 35,
-        `numTurns: ${skill.metadata["numTurns"]}`,
+        `numTurns: ${skill.metadata["numTurns"] || 0}`,
         {
           fontSize: "14px",
           color: "white",
@@ -122,6 +155,36 @@ export default class Game extends Phaser.Scene {
       );
     } else {
       this.numTurnSkillInfo.setText(`numTurns: ${skill.metadata["numTurns"]}`);
+    }
+    if (!this.skillInfoActions) {
+      this.skillInfoActions = [];
+    }
+    if (this.skillInfoActions.length) {
+      this.skillInfoActions.forEach((item) => {
+        item.setText("");
+      });
+    }
+    if (skill.metadata["actions"] && skill.metadata["actions"].length) {
+      skill.metadata["actions"].forEach((item, index) => {
+        if (this.skillInfoActions && !this.skillInfoActions[index]) {
+          this.skillInfoActions.push(
+            this.add.text(
+              x,
+              y - 35 + (index + 1) * 15,
+              `action: ${item.action.description} - ${item.action.target}`,
+              {
+                fontSize: "14px",
+                color: "white",
+              }
+            )
+          );
+        }
+        if (this.skillInfoActions && this.skillInfoActions[index]) {
+          this.skillInfoActions[index].setText(
+            `action: ${item.action.description} - ${item.target}`
+          );
+        }
+      });
     }
   };
 
@@ -1091,11 +1154,11 @@ export default class Game extends Phaser.Scene {
 
   private endTurn() {
     // NOTE: set disable skill after each turn
-    if (this.currCharacter.type === EEntityTypePvERoom.ENEMY) {
-      this.currCharacter.skill_objects.forEach((item) => {
-        item.setVisible(false);
-      });
-    }
+    // if (this.currCharacter.type === EEntityTypePvERoom.ENEMY) {
+    //   this.currCharacter.skill_objects.forEach((item) => {
+    //     item.setVisible(false);
+    //   });
+    // }
     this.aliveNekos.forEach((e) => {
       this.isShowNekoEffect(e, false);
       if (e.metadata.mana < 5) {
