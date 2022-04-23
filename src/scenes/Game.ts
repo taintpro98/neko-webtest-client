@@ -1154,11 +1154,11 @@ export default class Game extends Phaser.Scene {
 
   private endTurn() {
     // NOTE: set disable skill after each turn
-    // if (this.currCharacter.type === EEntityTypePvERoom.ENEMY) {
-    //   this.currCharacter.skill_objects.forEach((item) => {
-    //     item.setVisible(false);
-    //   });
-    // }
+    if (this.currCharacter.type === EEntityTypePvERoom.ENEMY) {
+      this.currCharacter.skill_objects.forEach((item) => {
+        item.fillColor = UNAVAILABLE_CONSUMPTION_ITEMS;
+      });
+    }
     this.aliveNekos.forEach((e) => {
       this.isShowNekoEffect(e, false);
       if (e.metadata.mana < 5) {
