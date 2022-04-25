@@ -618,11 +618,10 @@ export default class Game extends Phaser.Scene {
                 });
               }
               this.setGuideline(
-                `$NOW PICK ONLY ONE ${
-                  value.target === ETargetType.ALLALLIES ||
+                `$NOW PICK ONLY ONE ${value.target === ETargetType.ALLALLIES ||
                   value.target === ETargetType.ALLY
-                    ? "NEKO"
-                    : "ENEMY"
+                  ? "NEKO"
+                  : "ENEMY"
                 }`
               );
               this.skillInfo.target = value.target;
@@ -846,14 +845,12 @@ export default class Game extends Phaser.Scene {
       );
       const name =
         action.type === EEntityTypePvERoom.NEKO
-          ? `${
-              this.aliveNekos.get(action.id)?.name ||
-              `DEAD ${this.initialNekos.get(action.id)?.name}`
-            }`
-          : `${
-              this.aliveEnemies.get(action.id)?.name ||
-              `DEAD ${this.initialEnemies.get(action.id)?.name}`
-            }`;
+          ? `${this.aliveNekos.get(action.id)?.name ||
+          `DEAD ${this.initialNekos.get(action.id)?.name}`
+          }`
+          : `${this.aliveEnemies.get(action.id)?.name ||
+          `DEAD ${this.initialEnemies.get(action.id)?.name}`
+          }`;
       if (entityQueue.text) {
         entityQueue.text.setActive(false).setVisible(false);
       }
@@ -891,14 +888,12 @@ export default class Game extends Phaser.Scene {
     this.skillInfo.targets = [];
     this.skillInfo.actionType = EActionEntityTypePvERoom.NONE;
     this.setCharacterInfo(
-      `${this.currCharacter.name} with atk: ${
-        this.currCharacter.currentMetadata
-          ? this.currCharacter.currentMetadata.atk
-          : this.currCharacter.atk
-      }, def: ${
-        this.currCharacter.currentMetadata
-          ? this.currCharacter.currentMetadata.def
-          : this.currCharacter.def
+      `${this.currCharacter.name} with atk: ${this.currCharacter.currentMetadata
+        ? this.currCharacter.currentMetadata.atk
+        : this.currCharacter.atk
+      }, def: ${this.currCharacter.currentMetadata
+        ? this.currCharacter.currentMetadata.def
+        : this.currCharacter.def
       }`
     );
   }
@@ -998,7 +993,7 @@ export default class Game extends Phaser.Scene {
       effectNeko.m_atk_text.setText(
         `M_ATK: ${Number(effectNeko.m_atk).toFixed(1)}`
       );
-      effectNeko.m_atk_text.setText(
+      effectNeko.m_def_text.setText(
         `M_DEF: ${Number(effectNeko.m_def).toFixed(1)}`
       );
       effectNeko.atk_text.setText(`ATK: ${Number(effectNeko.atk).toFixed(1)}`);
@@ -1050,7 +1045,7 @@ export default class Game extends Phaser.Scene {
       effectEnemy.m_atk_text.setText(
         `M_ATK: ${Number(effectEnemy.m_atk).toFixed(1)}`
       );
-      effectEnemy.m_atk_text.setText(
+      effectEnemy.m_def_text.setText(
         `M_DEF: ${Number(effectEnemy.m_def).toFixed(1)}`
       );
       effectEnemy.atk_text.setText(
