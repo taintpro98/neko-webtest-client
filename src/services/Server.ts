@@ -260,6 +260,12 @@ export default class Server {
     this.room.send(EMessagePVERoom.DoneAnimation, { x: 1 });
   }
 
+  sendDoneEndAnimation() {
+    if (!this.room) return;
+    this.room.send(EMessagePVERoom.DoneEndFightAnimation);
+  }
+
+
   endTurn(cb: () => void, context?: any) {
     this.events.on("end-turn", cb, context);
   }
