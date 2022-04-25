@@ -61,6 +61,7 @@ export default class Game extends Phaser.Scene {
   private manaSkillInfo?: Phaser.GameObjects.Text;
   private nameSkillInfo?: Phaser.GameObjects.Text;
   private idSkillInfo?: Phaser.GameObjects.Text;
+  private descriptionSkillInfo?: Phaser.GameObjects.Text;
   private skillInfoActions?: Phaser.GameObjects.Text[];
 
   constructor() {
@@ -100,12 +101,25 @@ export default class Game extends Phaser.Scene {
     const y = height * 0.4;
 
     if (!this.nameSkillInfo) {
-      this.nameSkillInfo = this.add.text(x, y - 110, `Name: ${skill["name"]}`, {
+      this.nameSkillInfo = this.add.text(x, y - 130, `Name: ${skill["name"]}`, {
         fontSize: "14px",
         color: "white",
       });
     } else {
       this.nameSkillInfo.setText(`Name: ${skill["name"]}`);
+    }
+    if (!this.descriptionSkillInfo) {
+      this.descriptionSkillInfo = this.add.text(
+        x,
+        y - 110,
+        `Description: ${skill["description_skill_card"]}`,
+        {
+          fontSize: "14px",
+          color: "white",
+        }
+      );
+    } else {
+      this.nameSkillInfo.setText(`Description: ${skill["description_skill_card"]}`);
     }
 
     if (!this.idSkillInfo) {
@@ -349,37 +363,37 @@ export default class Game extends Phaser.Scene {
         ee.health_text = this.add.text(
           x - 75,
           y - 35,
-          `Health: ${enemies[idx]['metadata']["health"]}`,
+          `Health: ${enemies[idx]["metadata"]["health"]}`,
           { fontSize: "14px" }
         );
         ee.atk_text = this.add.text(
           x - 75,
           y - 20,
-          `ATK: ${enemies[idx]['currentMetadata']["atk"]}`,
+          `ATK: ${enemies[idx]["currentMetadata"]["atk"]}`,
           { fontSize: "14px" }
         );
         ee.def_text = this.add.text(
           x - 75,
           y - 5,
-          `DEF: ${enemies[idx]['currentMetadata']["def"]}`,
+          `DEF: ${enemies[idx]["currentMetadata"]["def"]}`,
           { fontSize: "14px" }
         );
         ee.m_atk_text = this.add.text(
           x - 75,
           y + 10,
-          `M_ATK: ${enemies[idx]['currentMetadata']["m_atk"]}`,
+          `M_ATK: ${enemies[idx]["currentMetadata"]["m_atk"]}`,
           { fontSize: "14px" }
         );
         ee.m_def_text = this.add.text(
           x - 75,
           y + 25,
-          `M_DEF: ${enemies[idx]['currentMetadata']["m_def"]}`,
+          `M_DEF: ${enemies[idx]["currentMetadata"]["m_def"]}`,
           { fontSize: "14px" }
         );
         ee.mana_text = this.add.text(
           x - 75,
           y + 40,
-          `Mana: ${enemies[idx]['metadata']["mana"]}`,
+          `Mana: ${enemies[idx]["metadata"]["mana"]}`,
           { fontSize: "14px" }
         );
         this.addSkillEnemies(x, y, enemies[idx]);
@@ -422,37 +436,37 @@ export default class Game extends Phaser.Scene {
         ne.health_text = this.add.text(
           x - 75,
           y - 35,
-          `Health: ${roomNekos[idx - 6]['metadata']["health"]}`,
+          `Health: ${roomNekos[idx - 6]["metadata"]["health"]}`,
           { fontSize: "14px" }
         );
         ne.atk_text = this.add.text(
           x - 75,
           y - 20,
-          `ATK: ${roomNekos[idx - 6]['currentMetadata']["atk"]}`,
+          `ATK: ${roomNekos[idx - 6]["currentMetadata"]["atk"]}`,
           { fontSize: "14px" }
         );
         ne.def_text = this.add.text(
           x - 75,
           y - 5,
-          `DEF: ${roomNekos[idx - 6]['currentMetadata']["def"]}`,
+          `DEF: ${roomNekos[idx - 6]["currentMetadata"]["def"]}`,
           { fontSize: "14px" }
         );
         ne.m_atk_text = this.add.text(
           x - 75,
           y + 10,
-          `M_ATK: ${roomNekos[idx - 6]['currentMetadata']["m_atk"]}`,
+          `M_ATK: ${roomNekos[idx - 6]["currentMetadata"]["m_atk"]}`,
           { fontSize: "14px" }
         );
         ne.m_def_text = this.add.text(
           x - 75,
           y + 25,
-          `M_DEF: ${roomNekos[idx - 6]['currentMetadata']["m_def"]}`,
+          `M_DEF: ${roomNekos[idx - 6]["currentMetadata"]["m_def"]}`,
           { fontSize: "14px" }
         );
         ne.mana_text = this.add.text(
           x - 70,
           y + 40,
-          `Mana: ${roomNekos[idx - 6]['metadata']["mana"]}`
+          `Mana: ${roomNekos[idx - 6]["metadata"]["mana"]}`
         );
         this.addSkillsnItems(x, y, roomNekos[idx - 6]);
         this.addNekoEffect(x, y, roomNekos[idx - 6]);
@@ -604,10 +618,11 @@ export default class Game extends Phaser.Scene {
                 });
               }
               this.setGuideline(
-                `$NOW PICK ONLY ONE ${value.target === ETargetType.ALLALLIES ||
+                `$NOW PICK ONLY ONE ${
+                  value.target === ETargetType.ALLALLIES ||
                   value.target === ETargetType.ALLY
-                  ? "NEKO"
-                  : "ENEMY"
+                    ? "NEKO"
+                    : "ENEMY"
                 }`
               );
               this.skillInfo.target = value.target;
@@ -831,12 +846,14 @@ export default class Game extends Phaser.Scene {
       );
       const name =
         action.type === EEntityTypePvERoom.NEKO
-          ? `${this.aliveNekos.get(action.id)?.name ||
-          `DEAD ${this.initialNekos.get(action.id)?.name}`
-          }`
-          : `${this.aliveEnemies.get(action.id)?.name ||
-          `DEAD ${this.initialEnemies.get(action.id)?.name}`
-          }`;
+          ? `${
+              this.aliveNekos.get(action.id)?.name ||
+              `DEAD ${this.initialNekos.get(action.id)?.name}`
+            }`
+          : `${
+              this.aliveEnemies.get(action.id)?.name ||
+              `DEAD ${this.initialEnemies.get(action.id)?.name}`
+            }`;
       if (entityQueue.text) {
         entityQueue.text.setActive(false).setVisible(false);
       }
@@ -874,12 +891,14 @@ export default class Game extends Phaser.Scene {
     this.skillInfo.targets = [];
     this.skillInfo.actionType = EActionEntityTypePvERoom.NONE;
     this.setCharacterInfo(
-      `${this.currCharacter.name} with atk: ${this.currCharacter.currentMetadata
-        ? this.currCharacter.currentMetadata.atk
-        : this.currCharacter.atk
-      }, def: ${this.currCharacter.currentMetadata
-        ? this.currCharacter.currentMetadata.def
-        : this.currCharacter.def
+      `${this.currCharacter.name} with atk: ${
+        this.currCharacter.currentMetadata
+          ? this.currCharacter.currentMetadata.atk
+          : this.currCharacter.atk
+      }, def: ${
+        this.currCharacter.currentMetadata
+          ? this.currCharacter.currentMetadata.def
+          : this.currCharacter.def
       }`
     );
   }
@@ -921,7 +940,10 @@ export default class Game extends Phaser.Scene {
   }
 
   private async updateResults(action: TActionResponse, effect: any) {
-    console.log("🚀 ~ file: Game.ts ~ line 896 ~ Game ~ updateResults ~ effect", effect)
+    console.log(
+      "🚀 ~ file: Game.ts ~ line 896 ~ Game ~ updateResults ~ effect",
+      effect
+    );
     this.setNotification("RESULTS AND ANIMATION");
     this.actionClock?.stop();
     this.error?.setVisible(false);
@@ -979,12 +1001,8 @@ export default class Game extends Phaser.Scene {
       effectNeko.m_atk_text.setText(
         `M_DEF: ${Number(effectNeko.m_def).toFixed(1)}`
       );
-      effectNeko.atk_text.setText(
-        `ATK: ${Number(effectNeko.atk).toFixed(1)}`
-      );
-      effectNeko.def_text.setText(
-        `DEF: ${Number(effectNeko.def).toFixed(1)}`
-      );
+      effectNeko.atk_text.setText(`ATK: ${Number(effectNeko.atk).toFixed(1)}`);
+      effectNeko.def_text.setText(`DEF: ${Number(effectNeko.def).toFixed(1)}`);
 
       // set text effect
       effectNeko.health_text_effect.setText(`${ne.health || 0}`);
@@ -1068,7 +1086,10 @@ export default class Game extends Phaser.Scene {
   }
 
   private async updateEndResult(effect: any) {
-    console.log("🚀 ~ file: Game.ts ~ line 1028 ~ Game ~ updateEndResult ~ effect", effect)
+    console.log(
+      "🚀 ~ file: Game.ts ~ line 1028 ~ Game ~ updateEndResult ~ effect",
+      effect
+    );
     this.setNotification("END RESULTS AND ANIMATION");
     this.actionClock?.stop();
     this.error?.setVisible(false);
@@ -1149,14 +1170,10 @@ export default class Game extends Phaser.Scene {
       this.isShowEnemyEffect(effectEnemy, false);
 
       effectEnemy.health += ee.health || 0;
-      effectEnemy.currentDef =
-        effectEnemy.def + (ee.def || 0);
-      effectEnemy.currentAtk =
-        effectEnemy.atk + (ee.atk || 0);
-      effectEnemy.currentM_def =
-        effectEnemy.m_def + (ee.m_def || 0);
-      effectEnemy.currentM_atk =
-        effectEnemy.m_atk + (ee.m_atk || 0);
+      effectEnemy.currentDef = effectEnemy.def + (ee.def || 0);
+      effectEnemy.currentAtk = effectEnemy.atk + (ee.atk || 0);
+      effectEnemy.currentM_def = effectEnemy.m_def + (ee.m_def || 0);
+      effectEnemy.currentM_atk = effectEnemy.m_atk + (ee.m_atk || 0);
       effectEnemy.mana += ee.mana ? ee.mana : 0;
 
       // set text show enemy property
