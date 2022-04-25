@@ -983,6 +983,12 @@ export default class Game extends Phaser.Scene {
       effectNeko.m_atk += ne.m_atk || 0;
       effectNeko.mana += ne.mana ? ne.mana : 0;
 
+      effectNeko.currentAtk = effectNeko.atk;
+      effectNeko.currentDef = effectNeko.def;
+      effectNeko.currentM_Atk = effectNeko.m_atk;
+      effectNeko.currentM_def = effectNeko.m_def;
+      effectNeko.currentMana = effectNeko.mana;
+
       effectNeko.health_text.setText(
         `Health: ${Number(effectNeko.health).toFixed(2)}`
       );
@@ -1024,8 +1030,16 @@ export default class Game extends Phaser.Scene {
       effectEnemy.def += ee.def || 0;
       effectEnemy.atk += ee.atk || 0;
       effectEnemy.m_def += ee.m_def || 0;
+      effectEnemy.m_def += ee.m_def || 0;
+      effectEnemy.m_def += ee.m_def || 0;
       effectEnemy.m_atk += ee.m_atk || 0;
       effectEnemy.mana += ee.mana ? ee.mana : 0;
+
+      effectEnemy.currentAtk = effectEnemy.atk;
+      effectEnemy.currentDef = effectEnemy.def;
+      effectEnemy.currentM_Atk = effectEnemy.m_atk;
+      effectEnemy.currentM_def = effectEnemy.m_def;
+      effectEnemy.currentMana = effectEnemy.mana;
 
       effectEnemy.health_text.setText(
         `Health: ${Number(effectEnemy.health).toFixed(1)}`
@@ -1067,8 +1081,8 @@ export default class Game extends Phaser.Scene {
     if (!diedEnitties.includes(this.currCharacter.id)) {
       currentCharQueue.object.fillColor = PROCESSED_QUEUE;
     }
-    // this.setNotification("MAKING ANIMATION...");
-    // setTimeout(() => this.server?.sendDoneAnimation(), 3000);
+    this.setNotification("MAKING ANIMATION...");
+    setTimeout(() => this.server?.sendDoneAnimation(), 3000);
   }
 
   private async updateEndResult(effect: any) {
@@ -1204,8 +1218,8 @@ export default class Game extends Phaser.Scene {
     if (!diedEnitties.includes(this.currCharacter.id)) {
       currentCharQueue.object.fillColor = PROCESSED_QUEUE;
     }
-    this.setNotification("MAKING ANIMATION...");
-    setTimeout(() => this.server?.sendDoneAnimation(), 3000);
+    this.setNotification("MAKING END FIGHT ANIMATION...");
+    setTimeout(() => this.server?.sendDoneEndAnimation(), 3000);
   }
 
   private endTurn() {
