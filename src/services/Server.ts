@@ -21,7 +21,7 @@ export default class Server {
   private enemies: any[] = [];
 
   constructor() {
-    this.client = new Client("ws://localhost:4000");
+    this.client = new Client("ws://13.212.107.173:4000");
     this.events = new Phaser.Events.EventEmitter();
   }
 
@@ -37,13 +37,13 @@ export default class Server {
         id: "2a92913b-98c1-46ff-8427-aa3bfd08d75f",
         skill_ids: [
           "fb13956f-40af-48cb-bf1f-9c7238e25b46",
-          "15449e11-0e3e-4e25-bbc4-55abff048f0e",
+          "c991124f-b4b3-44e9-8bef-03b5fadce885",
         ],
       },
       {
         id: "15c6b4ae-bcd5-4886-bf1e-ec98790e96f3",
         skill_ids: [
-          "c991124f-b4b3-44e9-8bef-03b5fadce885",
+          "15449e11-0e3e-4e25-bbc4-55abff048f0e",
           "cec12728-c231-43a0-a6be-a936d40bdab3",
         ],
       },
@@ -51,7 +51,7 @@ export default class Server {
         id: "fa681035-cddc-44be-8182-bd25057c5534",
         skill_ids: [
           "ccf77825-835b-4d90-a81b-96be3919e652",
-          "6addb7d1-ec57-407b-b5fb-c3d1c06d5cd6",
+          "6c055f33-6137-43e1-b0f8-1984cce3ea33",
         ],
       },
     ];
