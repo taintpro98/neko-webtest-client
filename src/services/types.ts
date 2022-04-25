@@ -52,6 +52,7 @@ export type TEntityEffect = {
   mana?: number;
   m_atk?: number;
   m_def?: number;
+  speed?: number;
 };
 
 export type TActionResponse = {

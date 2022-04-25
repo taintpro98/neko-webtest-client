@@ -119,7 +119,9 @@ export default class Game extends Phaser.Scene {
         }
       );
     } else {
-      this.nameSkillInfo.setText(`Description: ${skill["description_skill_card"]}`);
+      this.nameSkillInfo.setText(
+        `Description: ${skill["description_skill_card"]}`
+      );
     }
 
     if (!this.idSkillInfo) {
@@ -245,6 +247,10 @@ export default class Game extends Phaser.Scene {
 
         mana_text: null,
         mana_text_effect: null,
+
+        speed_text: null,
+        speed_text_effect: null,
+
         effect_area: null,
         star_object: null,
         circle_object: null,
@@ -296,6 +302,9 @@ export default class Game extends Phaser.Scene {
 
         mana_text: null,
         mana_text_effect: null,
+
+        speed_text: null,
+        speed_text_effect: null,
         effect_area: null,
 
         star_object: null,
@@ -396,6 +405,13 @@ export default class Game extends Phaser.Scene {
           `Mana: ${enemies[idx]["metadata"]["mana"]}`,
           { fontSize: "14px" }
         );
+
+        ee.speed_text = this.add.text(
+          x - 75,
+          y + 55,
+          `Mana: ${enemies[idx]["metadata"]["speed"]}`,
+          { fontSize: "14px" }
+        );
         this.addSkillEnemies(x, y, enemies[idx]);
         this.addEnemyEffect(x, y, enemies[idx]);
       }
@@ -467,6 +483,13 @@ export default class Game extends Phaser.Scene {
           x - 70,
           y + 40,
           `Mana: ${roomNekos[idx - 6]["metadata"]["mana"]}`
+        );
+
+        ne.speed_text = this.add.text(
+          x - 70,
+          y + 55,
+          `Mana: ${roomNekos[idx - 6]["metadata"]["speed"]}`,
+          { fontSize: "14px" }
         );
         this.addSkillsnItems(x, y, roomNekos[idx - 6]);
         this.addNekoEffect(x, y, roomNekos[idx - 6]);
@@ -618,10 +641,11 @@ export default class Game extends Phaser.Scene {
                 });
               }
               this.setGuideline(
-                `$NOW PICK ONLY ONE ${value.target === ETargetType.ALLALLIES ||
+                `$NOW PICK ONLY ONE ${
+                  value.target === ETargetType.ALLALLIES ||
                   value.target === ETargetType.ALLY
-                  ? "NEKO"
-                  : "ENEMY"
+                    ? "NEKO"
+                    : "ENEMY"
                 }`
               );
               this.skillInfo.target = value.target;
@@ -718,6 +742,11 @@ export default class Game extends Phaser.Scene {
       fontSize: "12px",
       fontStyle: "bold",
     });
+    ne.speed_text_effect = this.add.text(x + 40, y + 55, "", {
+      color: "white",
+      fontSize: "12px",
+      fontStyle: "bold",
+    });
     ne.effect_area.setVisible(false);
     ne.health_text_effect.setVisible(false);
     ne.atk_text_effect.setVisible(false);
@@ -725,6 +754,7 @@ export default class Game extends Phaser.Scene {
     ne.m_atk_text_effect.setVisible(false);
     ne.m_def_effect_text.setVisible(false);
     ne.mana_text_effect.setVisible(false);
+    ne.speed_text_effect.setVisible(false);
   }
 
   private addEnemyEffect(x: number, y: number, enemy: any) {
@@ -767,6 +797,12 @@ export default class Game extends Phaser.Scene {
       fontSize: "12px",
       fontStyle: "bold",
     });
+
+    e.speed_text_effect = this.add.text(x + 40, y + 55, "", {
+      color: "white",
+      fontSize: "12px",
+      fontStyle: "bold",
+    });
     e.effect_area.setVisible(false);
     e.health_text_effect.setVisible(false);
     e.atk_text_effect.setVisible(false);
@@ -774,6 +810,7 @@ export default class Game extends Phaser.Scene {
     e.m_atk_text_effect.setVisible(false);
     e.m_def_effect_text.setVisible(false);
     e.mana_text_effect.setVisible(false);
+    e.speed_text_effect.setVisible(false);
   }
 
   private isShowEnemyEffect(ne: any, visible: boolean, ee?: TEntityEffect) {
@@ -784,6 +821,7 @@ export default class Game extends Phaser.Scene {
     enemy.m_atk_text_effect.setVisible(visible);
     enemy.m_def_effect_text.setVisible(visible);
     enemy.mana_text_effect.setVisible(visible);
+    enemy.speed_text_effect.setVisible(visible);
   }
 
   private isShowNekoEffect(ne: any, visible: boolean, ee?: TEntityEffect) {
@@ -795,6 +833,7 @@ export default class Game extends Phaser.Scene {
     ne.m_atk_text_effect.setVisible(visible);
     ne.m_def_effect_text.setVisible(visible);
     ne.mana_text_effect.setVisible(visible);
+    ne.speed_text_effect.setVisible(visible);
   }
 
   private addQueue(queue: any[], currIdx: number) {
@@ -845,12 +884,14 @@ export default class Game extends Phaser.Scene {
       );
       const name =
         action.type === EEntityTypePvERoom.NEKO
-          ? `${this.aliveNekos.get(action.id)?.name ||
-          `DEAD ${this.initialNekos.get(action.id)?.name}`
-          }`
-          : `${this.aliveEnemies.get(action.id)?.name ||
-          `DEAD ${this.initialEnemies.get(action.id)?.name}`
-          }`;
+          ? `${
+              this.aliveNekos.get(action.id)?.name ||
+              `DEAD ${this.initialNekos.get(action.id)?.name}`
+            }`
+          : `${
+              this.aliveEnemies.get(action.id)?.name ||
+              `DEAD ${this.initialEnemies.get(action.id)?.name}`
+            }`;
       if (entityQueue.text) {
         entityQueue.text.setActive(false).setVisible(false);
       }
@@ -888,12 +929,14 @@ export default class Game extends Phaser.Scene {
     this.skillInfo.targets = [];
     this.skillInfo.actionType = EActionEntityTypePvERoom.NONE;
     this.setCharacterInfo(
-      `${this.currCharacter.name} with atk: ${this.currCharacter.currentMetadata
-        ? this.currCharacter.currentMetadata.atk
-        : this.currCharacter.atk
-      }, def: ${this.currCharacter.currentMetadata
-        ? this.currCharacter.currentMetadata.def
-        : this.currCharacter.def
+      `${this.currCharacter.name} with atk: ${
+        this.currCharacter.currentMetadata
+          ? this.currCharacter.currentMetadata.atk
+          : this.currCharacter.atk
+      }, def: ${
+        this.currCharacter.currentMetadata
+          ? this.currCharacter.currentMetadata.def
+          : this.currCharacter.def
       }`
     );
   }
@@ -977,12 +1020,14 @@ export default class Game extends Phaser.Scene {
       effectNeko.m_def += ne.m_def || 0;
       effectNeko.m_atk += ne.m_atk || 0;
       effectNeko.mana += ne.mana ? ne.mana : 0;
+      effectNeko.speed += ne.speed ? ne.speed : 0;
 
       effectNeko.currentAtk = effectNeko.atk;
       effectNeko.currentDef = effectNeko.def;
       effectNeko.currentM_Atk = effectNeko.m_atk;
       effectNeko.currentM_def = effectNeko.m_def;
       effectNeko.currentMana = effectNeko.mana;
+      effectNeko.currentSpeed = effectNeko.speed;
 
       effectNeko.health_text.setText(
         `Health: ${Number(effectNeko.health).toFixed(2)}`
@@ -998,6 +1043,9 @@ export default class Game extends Phaser.Scene {
       );
       effectNeko.atk_text.setText(`ATK: ${Number(effectNeko.atk).toFixed(1)}`);
       effectNeko.def_text.setText(`DEF: ${Number(effectNeko.def).toFixed(1)}`);
+      effectNeko.speed_text.setText(
+        `SPEED: ${Number(effectNeko.speed).toFixed(1)}`
+      );
 
       // set text effect
       effectNeko.health_text_effect.setText(`${ne.health || 0}`);
@@ -1006,6 +1054,7 @@ export default class Game extends Phaser.Scene {
       effectNeko.m_atk_text_effect.setText(`${ne.m_atk || 0}`);
       effectNeko.def_text_effect.setText(`${ne.def || 0}`);
       effectNeko.m_def_effect_text.setText(`${ne.m_def || 0}`);
+      effectNeko.speed_text_effect.setText(`${ne.speed || 0}`);
       this.isShowNekoEffect(effectNeko, true, ne);
       if (effectNeko.health <= 0) {
         effectNeko.circle_object.setVisible(false);
@@ -1029,12 +1078,14 @@ export default class Game extends Phaser.Scene {
       effectEnemy.m_def += ee.m_def || 0;
       effectEnemy.m_atk += ee.m_atk || 0;
       effectEnemy.mana += ee.mana ? ee.mana : 0;
+      effectEnemy.speed += ee.speed ? ee.speed : 0;
 
       effectEnemy.currentAtk = effectEnemy.atk;
       effectEnemy.currentDef = effectEnemy.def;
       effectEnemy.currentM_Atk = effectEnemy.m_atk;
       effectEnemy.currentM_def = effectEnemy.m_def;
       effectEnemy.currentMana = effectEnemy.mana;
+      effectEnemy.currentSpeed = effectEnemy.speed;
 
       effectEnemy.health_text.setText(
         `Health: ${Number(effectEnemy.health).toFixed(1)}`
@@ -1054,6 +1105,9 @@ export default class Game extends Phaser.Scene {
       effectEnemy.def_text.setText(
         `DEF: ${Number(effectEnemy.def).toFixed(1)}`
       );
+      effectEnemy.speed_text.setText(
+        `SPEED: ${Number(effectEnemy.speed).toFixed(1)}`
+      );
 
       // set text enemy effect
       effectEnemy.health_text_effect.setText(`${ee.health || 0}`);
@@ -1062,6 +1116,7 @@ export default class Game extends Phaser.Scene {
       effectEnemy.m_atk_text_effect.setText(`${ee.m_atk || 0}`);
       effectEnemy.def_text_effect.setText(`${ee.def || 0}`);
       effectEnemy.m_def_effect_text.setText(`${ee.m_def || 0}`);
+      effectEnemy.speed_text_effect.setText(`${ee.speed || 0}`);
       this.isShowEnemyEffect(effectEnemy, true, ee);
       if (effectEnemy.health <= 0) {
         effectEnemy.circle_object.setVisible(false);
@@ -1120,6 +1175,7 @@ export default class Game extends Phaser.Scene {
       }
 
       effectNeko.mana += ne.mana ? ne.mana : 0;
+      effectNeko.currentSpeed = effectNeko.speed + ne.speed ? ne.speed : 0;
 
       // set text for property
       effectNeko.health_text.setText(
@@ -1141,6 +1197,10 @@ export default class Game extends Phaser.Scene {
         `DEF: ${Number(effectNeko.currentDef).toFixed(1)}`
       );
 
+      effectNeko.speed_text.setText(
+        `SPEED: ${Number(effectNeko.currentSpeed).toFixed(1)}`
+      );
+
       // set text effect
       effectNeko.health_text_effect.setText(`${ne.health || 0}`);
       effectNeko.mana_text_effect.setText(`${ne.mana || 0}`);
@@ -1148,6 +1208,7 @@ export default class Game extends Phaser.Scene {
       effectNeko.m_atk_text_effect.setText(`${ne.m_atk || 0}`);
       effectNeko.def_text_effect.setText(`${ne.def || 0}`);
       effectNeko.m_def_effect_text.setText(`${ne.m_def || 0}`);
+      effectNeko.speed_text_effect.setText(`${ne.speed || 0}`);
       this.isShowNekoEffect(effectNeko, true, ne);
 
       if (effectNeko.health <= 0) {
@@ -1169,6 +1230,7 @@ export default class Game extends Phaser.Scene {
       effectEnemy.currentAtk = effectEnemy.atk + (ee.atk || 0);
       effectEnemy.currentM_def = effectEnemy.m_def + (ee.m_def || 0);
       effectEnemy.currentM_atk = effectEnemy.m_atk + (ee.m_atk || 0);
+      effectEnemy.currentSpeed = effectEnemy.speed + (ee.speed || 0);
       effectEnemy.mana += ee.mana ? ee.mana : 0;
 
       // set text show enemy property
@@ -1190,6 +1252,9 @@ export default class Game extends Phaser.Scene {
       effectEnemy.def_text.setText(
         `DEF: ${Number(effectEnemy.currentDef).toFixed(1)}`
       );
+      effectEnemy.speed_text.setText(
+        `SPEED: ${Number(effectEnemy.currentSpeed).toFixed(1)}`
+      );
 
       // set text effect
       effectEnemy.health_text_effect.setText(`${ee.health || 0}`);
@@ -1198,6 +1263,7 @@ export default class Game extends Phaser.Scene {
       effectEnemy.m_atk_text_effect.setText(`${ee.m_atk || 0}`);
       effectEnemy.def_text_effect.setText(`${ee.def || 0}`);
       effectEnemy.m_def_effect_text.setText(`${ee.m_def || 0}`);
+      effectEnemy.speed_text_effect.setText(`${ee.speed || 0}`);
       this.isShowEnemyEffect(effectEnemy, true, ee);
 
       if (effectEnemy.health <= 0) {
