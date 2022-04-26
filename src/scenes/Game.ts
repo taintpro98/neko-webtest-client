@@ -119,7 +119,7 @@ export default class Game extends Phaser.Scene {
         }
       );
     } else {
-      this.nameSkillInfo.setText(
+      this.descriptionSkillInfo.setText(
         `Description: ${skill["description_skill_card"]}`
       );
     }
