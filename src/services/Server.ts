@@ -96,6 +96,7 @@ export default class Server {
           turn_effect: item.turn_effect,
           target: item.target,
           description_skill_card: item.description_skill_card,
+          code: item.code,
           metadata: {
             numTurns: item.metadata.numTurns,
             mana: item.metadata.mana,
@@ -121,6 +122,7 @@ export default class Server {
           turn_effect: item.turn_effect,
           target: item.target,
           description_skill_card: item.description_skill_card,
+          code: item.code,
           metadata: {
             numTurns: item.metadata.numTurns,
             mana: item.metadata.mana,
