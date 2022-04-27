@@ -651,11 +651,10 @@ export default class Game extends Phaser.Scene {
                 });
               }
               this.setGuideline(
-                `$NOW PICK ONLY ONE ${
-                  value.target === ETargetType.ALLALLIES ||
+                `$NOW PICK ONLY ONE ${value.target === ETargetType.ALLALLIES ||
                   value.target === ETargetType.ALLY
-                    ? "NEKO"
-                    : "ENEMY"
+                  ? "NEKO"
+                  : "ENEMY"
                 }`
               );
               this.skillInfo.target = value.target;
@@ -894,14 +893,12 @@ export default class Game extends Phaser.Scene {
       );
       const name =
         action.type === EEntityTypePvERoom.NEKO
-          ? `${
-              this.aliveNekos.get(action.id)?.name ||
-              `DEAD ${this.initialNekos.get(action.id)?.name}`
-            }`
-          : `${
-              this.aliveEnemies.get(action.id)?.name ||
-              `DEAD ${this.initialEnemies.get(action.id)?.name}`
-            }`;
+          ? `${this.aliveNekos.get(action.id)?.name ||
+          `DEAD ${this.initialNekos.get(action.id)?.name}`
+          }`
+          : `${this.aliveEnemies.get(action.id)?.name ||
+          `DEAD ${this.initialEnemies.get(action.id)?.name}`
+          }`;
       if (entityQueue.text) {
         entityQueue.text.setActive(false).setVisible(false);
       }
@@ -939,14 +936,12 @@ export default class Game extends Phaser.Scene {
     this.skillInfo.targets = [];
     this.skillInfo.actionType = EActionEntityTypePvERoom.NONE;
     this.setCharacterInfo(
-      `${this.currCharacter.name} with atk: ${
-        this.currCharacter.currentMetadata
-          ? this.currCharacter.currentMetadata.atk
-          : this.currCharacter.atk
-      }, def: ${
-        this.currCharacter.currentMetadata
-          ? this.currCharacter.currentMetadata.def
-          : this.currCharacter.def
+      `${this.currCharacter.name} with atk: ${this.currCharacter.currentMetadata
+        ? this.currCharacter.currentMetadata.atk
+        : this.currCharacter.atk
+      }, def: ${this.currCharacter.currentMetadata
+        ? this.currCharacter.currentMetadata.def
+        : this.currCharacter.def
       }`
     );
   }
@@ -1142,7 +1137,7 @@ export default class Game extends Phaser.Scene {
       currentCharQueue.object.fillColor = PROCESSED_QUEUE;
     }
     this.setNotification("MAKING ANIMATION...");
-    setTimeout(() => this.server?.sendDoneAnimation(), 3000);
+    setTimeout(() => this.server?.sendDoneAnimation(), TIME_CONFIG.WAITING_FOR_ANIMATION);
   }
 
   private async updateEndResult(effect: any) {
@@ -1290,7 +1285,7 @@ export default class Game extends Phaser.Scene {
       currentCharQueue.object.fillColor = PROCESSED_QUEUE;
     }
     this.setNotification("MAKING END FIGHT ANIMATION...");
-    setTimeout(() => this.server?.sendDoneEndAnimation(), 3000);
+    setTimeout(() => this.server?.sendDoneEndAnimation(), TIME_CONFIG.WAITING_FOR_ENDFIGHT);
   }
 
   private endTurn() {
