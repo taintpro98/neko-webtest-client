@@ -62,6 +62,7 @@ export default class Game extends Phaser.Scene {
   private nameSkillInfo?: Phaser.GameObjects.Text;
   private idSkillInfo?: Phaser.GameObjects.Text;
   private descriptionSkillInfo?: Phaser.GameObjects.Text;
+  private codeSkillInfo?: Phaser.GameObjects.Text;
   private skillInfoActions?: Phaser.GameObjects.Text[];
 
   constructor() {
@@ -101,12 +102,21 @@ export default class Game extends Phaser.Scene {
     const y = height * 0.4;
 
     if (!this.nameSkillInfo) {
-      this.nameSkillInfo = this.add.text(x, y - 130, `Name: ${skill["name"]}`, {
+      this.nameSkillInfo = this.add.text(x, y - 150, `Name: ${skill["name"]}`, {
         fontSize: "14px",
         color: "white",
       });
     } else {
       this.nameSkillInfo.setText(`Name: ${skill["name"]}`);
+    }
+
+    if (!this.codeSkillInfo) {
+      this.codeSkillInfo = this.add.text(x, y - 130, `Code: ${skill["code"]}`, {
+        fontSize: "14px",
+        color: "white",
+      });
+    } else {
+      this.codeSkillInfo.setText(`Code: ${skill["code"]}`);
     }
     if (!this.descriptionSkillInfo) {
       this.descriptionSkillInfo = this.add.text(
