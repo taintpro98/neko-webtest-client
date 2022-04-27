@@ -1077,7 +1077,7 @@ export default class Game extends Phaser.Scene {
       currentCharQueue.object.fillColor = PROCESSED_QUEUE;
     }
     this.setNotification("MAKING ANIMATION...");
-    setTimeout(() => this.server?.sendDoneAnimation(), 3000);
+    setTimeout(() => this.server?.sendDoneAnimation(), 5000);
   }
 
   private async updateEndResult(effect: any) {
@@ -1214,7 +1214,7 @@ export default class Game extends Phaser.Scene {
       currentCharQueue.object.fillColor = PROCESSED_QUEUE;
     }
     this.setNotification("MAKING END FIGHT ANIMATION...");
-    setTimeout(() => this.server?.sendDoneEndAnimation(), 3000);
+    setTimeout(() => this.server?.sendDoneEndAnimation(), 5000);
   }
 
   private endTurn() {

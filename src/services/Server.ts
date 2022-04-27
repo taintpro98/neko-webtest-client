@@ -36,22 +36,24 @@ export default class Server {
       {
         id: "2a92913b-98c1-46ff-8427-aa3bfd08d75f",
         skill_ids: [
-          "fb13956f-40af-48cb-bf1f-9c7238e25b46",
-          "c991124f-b4b3-44e9-8bef-03b5fadce885",
+          "5552306c-78b4-4c45-bed1-886d8aaa32c0",
+          "3890a002-948d-43e1-a0dd-22428c85c3b3",
+          "60ecad94-65c2-4eaf-bcdd-850b81e6c1b4",
         ],
       },
       {
         id: "15c6b4ae-bcd5-4886-bf1e-ec98790e96f3",
         skill_ids: [
-          "15449e11-0e3e-4e25-bbc4-55abff048f0e",
-          "cec12728-c231-43a0-a6be-a936d40bdab3",
+          "82398099-6fb4-48a7-a1a4-8fee7030ae59",
+          "21d73e4a-13aa-4894-b6d5-90dced76481f",
+          "7e4bd07d-cc65-4493-89c8-e61b6f1161f0",
         ],
       },
       {
         id: "fa681035-cddc-44be-8182-bd25057c5534",
         skill_ids: [
-          "ccf77825-835b-4d90-a81b-96be3919e652",
-          "6c055f33-6137-43e1-b0f8-1984cce3ea33",
+          "2ed6c66a-f12e-4d5b-8e34-8cc5fa5610bb",
+          "b0b5e866-9a6c-4f3d-be47-c4f3e5001982",
         ],
       },
     ];
