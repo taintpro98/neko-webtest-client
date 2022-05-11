@@ -21,7 +21,7 @@ export default class Server {
   private enemies: any[] = [];
 
   constructor() {
-    this.client = new Client("ws://13.212.107.173:4000");
+    this.client = new Client("ws://localhost:4000");
     this.events = new Phaser.Events.EventEmitter();
   }
 
@@ -34,34 +34,27 @@ export default class Server {
     const access_token = loginResponse.data.data.access_token;
     const nekos = [
       {
-        id: "2a92913b-98c1-46ff-8427-aa3bfd08d75f",
+        id: "cbc2a246-bfe7-4258-950b-86b5b5bd741e",
         skill_ids: [
-          "2621af68-5674-4136-ab5c-a8e4a4f01f6b",
-          "fb13956f-40af-48cb-bf1f-9c7238e25b46",
-          "c991124f-b4b3-44e9-8bef-03b5fadce885",
-          "5552306c-78b4-4c45-bed1-886d8aaa32c0",
-          "3890a002-948d-43e1-a0dd-22428c85c3b3",
-          "60ecad94-65c2-4eaf-bcdd-850b81e6c1b4",
+          "3a7c342f-fbae-49f3-9603-a1d3edc6c4f4",
+          "dcd32a49-a6ff-431b-94c9-cbed6ef5224c",
+          "86a59c6a-57d4-4d64-a6f5-b1c9b94b9330",
         ],
       },
       {
-        id: "15c6b4ae-bcd5-4886-bf1e-ec98790e96f3",
+        id: "c9ae3611-c824-4c27-9f73-9a3dd5e8f186",
         skill_ids: [
-          "82398099-6fb4-48a7-a1a4-8fee7030ae59",
-          "21d73e4a-13aa-4894-b6d5-90dced76481f",
-          "7e4bd07d-cc65-4493-89c8-e61b6f1161f0",
-          "15449e11-0e3e-4e25-bbc4-55abff048f0e",
-          "cec12728-c231-43a0-a6be-a936d40bdab3",
+          "0d7caf9f-25d6-4ef4-902e-1caa64a8729b",
+          "76673a7f-65f5-4eec-85d9-9582aafbe3cf",
+          "de923add-9dd6-4436-b0d4-bdec6a1f148b",
         ],
       },
       {
-        id: "fa681035-cddc-44be-8182-bd25057c5534",
+        id: "8e402e7e-805f-4ecc-887b-3d040f3e7938",
         skill_ids: [
-          "6c055f33-6137-43e1-b0f8-1984cce3ea33",
-          "90f42c09-f1bf-467e-aa32-49c191a9da6b",
-          "ccf77825-835b-4d90-a81b-96be3919e652",
-          "2ed6c66a-f12e-4d5b-8e34-8cc5fa5610bb",
-          "b0b5e866-9a6c-4f3d-be47-c4f3e5001982",
+          "c2ea14ec-b521-47ad-ac06-cad1bd49677e",
+          "1003c8d2-44ba-4137-9f80-4685c961e569",
+          "50f5297b-c9be-421a-bb0c-f16ab470e23f",
         ],
       },
     ];
@@ -69,10 +62,19 @@ export default class Server {
     const createData = {
       map_level_id: "bd71bc34-8740-4cfc-aa7b-bb90bc44b8a4",
       nekos,
-      consumption_item_ids: [
-        "5d90ca38-9217-4ead-a8e1-b130610ddb68",
-        "cf5aa1e0-57b8-457e-b4e8-4b8859978507",
-        "d8eb0196-258b-4d72-a0cf-25188dc39940",
+      consumption_items: [
+        {
+          id: "ca5916ca-1a14-4bef-8bbf-fa714b592efc",
+          quantity: 2
+        },
+        {
+          id: "963f3831-6be8-4331-b0f1-56857a5d9206",
+          quantity: 5
+        },
+        {
+          id: "90a45c94-ab4c-4d97-ae66-c954628b84f8",
+          quantity: 5
+        }
       ],
     };
     const result = await axiosInstance.post(
@@ -86,7 +88,6 @@ export default class Server {
     );
 
     const roomState = pveRoomStateData.data.data;
-    console.log(roomState);
     roomState.nekos.forEach((item) => {
       let skills: any[] = [];
       if (item.skills.length !== 0) {
@@ -143,6 +144,7 @@ export default class Server {
       this.roomConsumptions.push({
         id: item.id,
         name: item.name,
+        quantity: item.quantity,
         consumption_item_type_id: item.consumption_item_type_id,
         metadata: {
           background: item.metadata.background,
@@ -192,6 +194,7 @@ export default class Server {
         case EMessagePVERoom.Result:
           console.log("RESULTS");
           this.events.emit("notification", "RESULTS");
+          console.log("update-results", message)
 
           this.events.emit("update-results", message.action, message.effect);
           break;
@@ -253,7 +256,6 @@ export default class Server {
   }
 
   sendSkillInformation(skillInfo: TPlanningInfoPVERoom) {
-    console.log("skill info", skillInfo);
     if (!this.room) return;
     this.room.send(EMessagePVERoom.Action, skillInfo);
   }

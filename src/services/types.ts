@@ -58,6 +58,7 @@ export type TEntityEffect = {
 export type TActionResponse = {
   actionId: string;
   actionType: EActionEntityTypePvERoom;
+  currConsumptionItems?: number;
 };
 
 export enum ETargetType {

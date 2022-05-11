@@ -49,9 +49,11 @@ export default class Game extends Phaser.Scene {
   private notification?: Phaser.GameObjects.Text;
   private characterInfo?: Phaser.GameObjects.Text;
   private guideline?: Phaser.GameObjects.Text;
-  private consumptionObject: Map<string, any> = new Map();
-  // private queue: Map<string, any> = new Map();
-  //   private currentRoundAndTurn?: Phaser.GameObjects.Text;
+  private consumptionObject: Map<string, {
+    object: any,
+    quantity_text: any 
+  }> = new Map();
+
   private error?: Phaser.GameObjects.Text;
   private nDoneCharacter: number = 0;
   private currCharacter: any;
@@ -332,6 +334,7 @@ export default class Game extends Phaser.Scene {
       this.consumptionItems.set(item.id, {
         id: item.id,
         name: item.name,
+        quantity: item.quantity,
         damage: item.metadata.damage,
         functionName: item.metadata.functionName,
       });
@@ -593,13 +596,16 @@ export default class Game extends Phaser.Scene {
         tmp.setVisible(false);
         // tmp.disableInteractive();
         this.add.text(x - 90, y + (currIdx + 1) * 150 - 20, `${value.name}`);
-        this.add.text(
+        let quantity_text = this.add.text(
           x - 90,
           y + (currIdx + 1) * 150 - 50,
-          `damage:${value.damage}`
+          `quantity: ${value.quantity}`
         );
         currIdx += 1;
-        this.consumptionObject.set(key, tmp);
+        this.consumptionObject.set(key, {
+          object: tmp,
+          quantity_text: quantity_text
+        });
       });
     }
   }
@@ -955,9 +961,9 @@ export default class Game extends Phaser.Scene {
       );
       this.setGuideline("CHOOSE A SKILL OR AN ITEM FOR NEKO");
       this.consumptionObject.forEach((value, key) => {
-        value.setInteractive();
-        value.setVisible(true);
-        value.fillColor = AVAILABLE_CONSUMPTION_ITEMS;
+        value.object.setInteractive();
+        value.object.setVisible(true);
+        value.object.fillColor = AVAILABLE_CONSUMPTION_ITEMS;
       });
       [...this.aliveEnemies.values()].forEach((ee) => {
         ee.circle_object.setInteractive();
@@ -990,12 +996,16 @@ export default class Game extends Phaser.Scene {
     this.setNotification("RESULTS AND ANIMATION");
     this.actionClock?.stop();
     this.error?.setVisible(false);
-    console.log("action: ", action);
 
     this.consumptionObject.forEach((value, key) => {
-      value.setVisible(false);
-      value.setInteractive();
+      value.object.setVisible(false);
+      value.object.setInteractive();
     });
+
+    if(action.actionType === EActionEntityTypePvERoom.ITEM){
+      this.consumptionObject.get(action.actionId)?.quantity_text.setText(`quantity: ${action.currConsumptionItems}`);
+    }
+
     const currentCharQueue = this.turnQueues.get(this.currCharacter.id);
     //NOTE: set choosen action of emeny
     if (this.currCharacter.type === EEntityTypePvERoom.ENEMY) {
@@ -1150,8 +1160,8 @@ export default class Game extends Phaser.Scene {
     this.error?.setVisible(false);
 
     this.consumptionObject.forEach((value, key) => {
-      value.setVisible(false);
-      value.setInteractive();
+      value.object.setVisible(false);
+      value.object.setInteractive();
     });
     const currentCharQueue = this.turnQueues.get(this.currCharacter.id);
     // this.currCharacter.circle_object.fillColor = this.skillInfo.nekoId
