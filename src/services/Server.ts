@@ -38,7 +38,6 @@ export default class Server {
         skill_ids: [
           "3a7c342f-fbae-49f3-9603-a1d3edc6c4f4",
           "dcd32a49-a6ff-431b-94c9-cbed6ef5224c",
-          "86a59c6a-57d4-4d64-a6f5-b1c9b94b9330",
         ],
       },
       {
@@ -62,20 +61,7 @@ export default class Server {
     const createData = {
       map_level_id: "bd71bc34-8740-4cfc-aa7b-bb90bc44b8a4",
       nekos,
-      consumption_items: [
-        {
-          id: "ca5916ca-1a14-4bef-8bbf-fa714b592efc",
-          quantity: 2
-        },
-        {
-          id: "963f3831-6be8-4331-b0f1-56857a5d9206",
-          quantity: 5
-        },
-        {
-          id: "90a45c94-ab4c-4d97-ae66-c954628b84f8",
-          quantity: 5
-        }
-      ],
+      consumption_item_ids: ["ca5916ca-1a14-4bef-8bbf-fa714b592efc", "963f3831-6be8-4331-b0f1-56857a5d9206", "90a45c94-ab4c-4d97-ae66-c954628b84f8"],
     };
     const result = await axiosInstance.post(
       "/v1/pve/rooms",
