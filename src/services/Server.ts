@@ -21,7 +21,7 @@ export default class Server {
   private enemies: any[] = [];
 
   constructor() {
-    this.client = new Client("ws://localhost:4000");
+    this.client = new Client("ws://13.212.107.173:4000");
     this.events = new Phaser.Events.EventEmitter();
   }
 
