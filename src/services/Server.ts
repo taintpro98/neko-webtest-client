@@ -61,7 +61,7 @@ export default class Server {
     const createData = {
       map_level_id: "bd71bc34-8740-4cfc-aa7b-bb90bc44b8a4",
       nekos,
-      consumption_item_ids: ["ca5916ca-1a14-4bef-8bbf-fa714b592efc", "963f3831-6be8-4331-b0f1-56857a5d9206", "90a45c94-ab4c-4d97-ae66-c954628b84f8"],
+      consumption_item_ids: ["963f3831-6be8-4331-b0f1-56857a5d9206", "90a45c94-ab4c-4d97-ae66-c954628b84f8"],
     };
     const result = await axiosInstance.post(
       "/v1/pve/rooms",
