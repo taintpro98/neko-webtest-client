@@ -21,7 +21,9 @@ export default class Server {
   private enemies: any[] = [];
 
   constructor() {
-    this.client = new Client("ws://13.212.107.173:4000");
+    // this.client = new Client("ws://battle-pve.nekoverse.net");
+    this.client = new Client("ws://localhost:4000");
+    // this.client = new Client("ws://13.214.128.88:4000");
     this.events = new Phaser.Events.EventEmitter();
   }
 
@@ -61,7 +63,7 @@ export default class Server {
     const createData = {
       map_level_id: "bd71bc34-8740-4cfc-aa7b-bb90bc44b8a4",
       nekos,
-      consumption_item_ids: ["963f3831-6be8-4331-b0f1-56857a5d9206", "90a45c94-ab4c-4d97-ae66-c954628b84f8"],
+      consumption_item_ids: ["1c4a9b29-ff8f-4244-8a0f-6bd7e2b0346a"],
     };
     const result = await axiosInstance.post(
       "/v1/pve/rooms",
@@ -148,7 +150,7 @@ export default class Server {
     this.room.onMessage("*", (type, message) => {
       switch (type) {
         case EMessagePVERoom.Ready:
-          console.log("READY");
+          // console.log("READY");
           this.events.emit("notification", "READY");
 
           this.events.emit(
@@ -159,12 +161,12 @@ export default class Server {
           );
           break;
         case EMessagePVERoom.StartRound:
-          console.log("START ROUND");
+          // console.log("START ROUND");
 
           this.events.emit("notification", `START ROUND ${message.round}`);
           break;
         case EMessagePVERoom.CalculateQueue:
-          console.log("GET A QUEUE");
+          // console.log("GET A QUEUE");
           this.events.emit("notification", "GOT A QUEUE");
 
           this.queue = message.turns;
@@ -178,39 +180,39 @@ export default class Server {
           }, 2000);
           break;
         case EMessagePVERoom.Result:
-          console.log("RESULTS");
+          // console.log("RESULTS");
           this.events.emit("notification", "RESULTS");
-          console.log("update-results", message)
+          // console.log("update-results", message)
 
           this.events.emit("update-results", message.action, message.effect);
           break;
         case EMessagePVERoom.EndResult:
-          console.log("END RESULTS");
+          // console.log("END RESULTS");
           this.events.emit("notification", "END RESULTS");
           this.events.emit("update-endresults", message.effect);
           break;
         case EMessagePVERoom.EndTurn:
-          console.log("END TURN");
+          // console.log("END TURN");
           this.events.emit("notification", `END TURN ${message.turn}`);
           this.events.emit("end-turn");
           break;
         case EMessagePVERoom.EndRound:
-          console.log("END ROUND");
+          // console.log("END ROUND");
           this.events.emit("notification", `END ROUND ${message.round}`);
           this.events.emit("end-round");
           break;
         case EMessagePVERoom.EndGame:
-          console.log("END GAME");
+          // console.log("END GAME");
           this.events.emit("notification", "END GAME");
           this.events.emit("end-game");
           break;
         case EMessagePVERoom.Error:
-          console.log("ERROR CHOOSING ACTION");
+          // console.log("ERROR CHOOSING ACTION");
           this.events.emit("notification", "ERROR");
           this.events.emit("on-error", message);
         default:
-          console.log(type);
-          console.log(message);
+          // console.log(type);
+          // console.log(message);
           break;
       }
     });
@@ -223,7 +225,7 @@ export default class Server {
     this.events.once("init-room", cb, context);
   }
   sendStartRound() {
-    console.log("START NEW ROUND");
+    // console.log("START NEW ROUND");
     this.room?.send(EMessagePVERoom.StartRound);
   }
 
@@ -236,7 +238,7 @@ export default class Server {
   }
 
   sendStartTurn() {
-    console.log("START TURN");
+    // console.log("START TURN");
     if (!this.room) return;
     this.room.send(EMessagePVERoom.StartTurn, this.currIdx);
   }

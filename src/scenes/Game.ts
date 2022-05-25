@@ -46,7 +46,7 @@ export default class Game extends Phaser.Scene {
   private consumptionItems: Map<string, any> = new Map();
   private currentEntitiesRound: Set<string> = new Set();
   private turnQueues: Map<string, any> = new Map();
-  
+
   private actionClock?: CountdownController;
   private notification?: Phaser.GameObjects.Text;
   private characterInfo?: Phaser.GameObjects.Text;
@@ -379,7 +379,7 @@ export default class Game extends Phaser.Scene {
         ee.star_object.setVisible(false);
         ee.circle_object.disableInteractive();
 
-        this.add.text(x - 75, y - 50, `Boss ${enemies[idx].name}`, {
+        this.add.text(x - 75, y - 50, `${enemies[idx].name}`, {
           fontSize: "14px",
         });
         ee.health_text = this.add.text(
@@ -448,6 +448,7 @@ export default class Game extends Phaser.Scene {
             [...this.aliveNekos.values()].forEach((ee) => {
               ee.circle_object.disableInteractive();
             });
+            console.log("fuckkkkkk")
             ne.star_object.setVisible(true);
             this.skillInfo.targets?.push({
               id: ne.id,
@@ -593,7 +594,7 @@ export default class Game extends Phaser.Scene {
             this.skillInfo.actionType = EActionEntityTypePvERoom.ITEM;
             this.skillInfo.actionId = value.id;
           });
-          this.consumptionItems.get(key).object.setVisible(false);
+        this.consumptionItems.get(key).object.setVisible(false);
         // tmp.disableInteractive();
         this.add.text(x - 90, y + (currIdx + 1) * 150 - 20, `${value.name}`);
         this.consumptionItems.get(key).quantity_text = this.add.text(
@@ -684,6 +685,7 @@ export default class Game extends Phaser.Scene {
     //     this.add.text(x + 30, y + 85 * (idx + 1) + 55, `${value.name}`);
     // })
   }
+
   private addSkillEnemies(x: number, y: number, enemy: any) {
     const ee = this.aliveEnemies.get(enemy.id);
     enemy.skills.forEach((value, idx) => {
@@ -893,14 +895,9 @@ export default class Game extends Phaser.Scene {
         80,
         pickColor(idx, action)
       );
-      const name =
-        action.type === EEntityTypePvERoom.NEKO
-          ? `${this.aliveNekos.get(action.id)?.name ||
-          `DEAD ${this.initialNekos.get(action.id)?.name}`
-          }`
-          : `${this.aliveEnemies.get(action.id)?.name ||
-          `DEAD ${this.initialEnemies.get(action.id)?.name}`
-          }`;
+      const name = action.type === EEntityTypePvERoom.NEKO ? this.aliveNekos.get(action.id)?.name.toString() || `DEAD ${this.initialNekos.get(action.id)?.name}`
+        : this.aliveEnemies.get(action.id)?.name.toString() || `DEAD ${this.initialEnemies.get(action.id)?.name}`;
+
       if (entityQueue.text) {
         entityQueue.text.setActive(false).setVisible(false);
       }
@@ -948,6 +945,7 @@ export default class Game extends Phaser.Scene {
     );
   }
 
+
   private startTurn() {
     this.buttonStartRound?.setVisible(false);
     if (this.skillInfo.nekoId) {
@@ -985,10 +983,10 @@ export default class Game extends Phaser.Scene {
   }
 
   private async updateResults(action: TActionResponse, effect: any) {
-    console.log(
-      "🚀 ~ file: Game.ts ~ line 896 ~ Game ~ updateResults ~ effect",
-      effect
-    );
+    // console.log(
+    //   "🚀 ~ file: Game.ts ~ line 896 ~ Game ~ updateResults ~ effect",
+    //   effect
+    // );
     this.setNotification("RESULTS AND ANIMATION");
     this.actionClock?.stop();
     this.error?.setVisible(false);
@@ -1020,6 +1018,7 @@ export default class Game extends Phaser.Scene {
     this.nDoneCharacter = (this.nDoneCharacter + 1) % 6;
     this.skillInfo.nekoId = "";
     let diedEnitties: any[] = [];
+
     await effect.nekos.forEach((ne: TEntityEffect) => {
       const effectNeko = this.aliveNekos.get(ne.id);
       this.isShowNekoEffect(effectNeko, false);
@@ -1068,6 +1067,7 @@ export default class Game extends Phaser.Scene {
       effectNeko.speed_text_effect.setText(`${ne.speed || 0}`);
       this.isShowNekoEffect(effectNeko, true, ne);
       if (effectNeko.health <= 0) {
+        console.log("updateResults")
         effectNeko.circle_object.setVisible(false);
         effectNeko.star_object.setVisible(false);
         const diedEntity = this.turnQueues.get(effectNeko.id);
@@ -1147,10 +1147,10 @@ export default class Game extends Phaser.Scene {
   }
 
   private async updateEndResult(effect: any) {
-    console.log(
-      "🚀 ~ file: Game.ts ~ line 1028 ~ Game ~ updateEndResult ~ effect",
-      effect
-    );
+    // console.log(
+    //   "🚀 ~ file: Game.ts ~ line 1028 ~ Game ~ updateEndResult ~ effect",
+    //   effect
+    // );
     this.setNotification("END RESULTS AND ANIMATION");
     this.actionClock?.stop();
     this.error?.setVisible(false);
@@ -1160,10 +1160,13 @@ export default class Game extends Phaser.Scene {
       value.object.setInteractive();
     });
     const currentCharQueue = this.turnQueues.get(this.currCharacter.id);
-    
+
     this.nDoneCharacter = (this.nDoneCharacter + 1) % 6;
     this.skillInfo.nekoId = "";
     let diedEnitties: any[] = [];
+
+    console.log("effect.nekos", effect.nekos)
+
     await effect.nekos.forEach((ne: TEntityEffect) => {
       const effectNeko = this.aliveNekos.get(ne.id);
       this.isShowNekoEffect(effectNeko, false);
@@ -1221,6 +1224,7 @@ export default class Game extends Phaser.Scene {
       this.isShowNekoEffect(effectNeko, true, ne);
 
       if (effectNeko.health <= 0) {
+        console.log("updateendresults")
         effectNeko.circle_object.setVisible(false);
         effectNeko.star_object.setVisible(false);
         const diedEntity = this.turnQueues.get(effectNeko.id);
@@ -1230,6 +1234,34 @@ export default class Game extends Phaser.Scene {
         diedEnitties.push(effectNeko.id);
       }
     });
+
+    const effectNekoIds: string[] = effect.nekos.map((ne: TEntityEffect) => (ne.id));
+    const nekosWithoutEffect = [...this.aliveNekos.values()].filter(value => !effectNekoIds.includes(value.id)).forEach(ne => {
+      const noEffectNeko = this.aliveNekos.get(ne.id);
+      noEffectNeko.health_text.setText(
+        `Health: ${Number(noEffectNeko.health).toFixed(1)}`
+      );
+      noEffectNeko.mana_text.setText(
+        `Mana: ${Number(noEffectNeko.mana).toFixed(1)}`
+      );
+      noEffectNeko.m_atk_text.setText(
+        `M_ATK: ${Number(noEffectNeko.m_atk).toFixed(1)}`
+      );
+      noEffectNeko.m_def_text.setText(
+        `M_DEF: ${Number(noEffectNeko.m_def).toFixed(1)}`
+      );
+      noEffectNeko.atk_text.setText(
+        `ATK: ${Number(noEffectNeko.atk).toFixed(1)}`
+      );
+      noEffectNeko.def_text.setText(
+        `DEF: ${Number(noEffectNeko.def).toFixed(1)}`
+      );
+
+      noEffectNeko.speed_text.setText(
+        `SPEED: ${Number(noEffectNeko.speed).toFixed(1)}`
+      );
+    })
+
     await effect.enemies.forEach((ee: TEntityEffect) => {
       const effectEnemy = this.aliveEnemies.get(ee.id);
       this.isShowEnemyEffect(effectEnemy, false);
@@ -1285,6 +1317,33 @@ export default class Game extends Phaser.Scene {
         diedEnitties.push(effectEnemy.id);
       }
     });
+
+    const effectEnemyIds: string[] = effect.enemies.map(ee => (ee.id));
+    const enemiesWithoutEffect = [...this.aliveEnemies.values()].filter(ee => !effectEnemyIds.includes(ee.id)).forEach(ee => {
+      const noEffectEnemy = this.aliveEnemies.get(ee.id);
+      noEffectEnemy.health_text.setText(
+        `Health: ${Number(noEffectEnemy.health).toFixed(1)}`
+      );
+      noEffectEnemy.mana_text.setText(
+        `Mana: ${Number(noEffectEnemy.mana).toFixed(1)}`
+      );
+      noEffectEnemy.m_atk_text.setText(
+        `M_ATK: ${Number(noEffectEnemy.m_atk).toFixed(1)}`
+      );
+      noEffectEnemy.m_def_text.setText(
+        `M_DEF: ${Number(noEffectEnemy.m_def).toFixed(1)}`
+      );
+      noEffectEnemy.atk_text.setText(
+        `ATK: ${Number(noEffectEnemy.atk).toFixed(1)}`
+      );
+      noEffectEnemy.def_text.setText(
+        `DEF: ${Number(noEffectEnemy.def).toFixed(1)}`
+      );
+
+      noEffectEnemy.speed_text.setText(
+        `SPEED: ${Number(noEffectEnemy.speed).toFixed(1)}`
+      );
+    })
     if (!diedEnitties.includes(this.currCharacter.id)) {
       currentCharQueue.object.fillColor = PROCESSED_QUEUE;
     }
